@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>熙岸珈琲所</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Noto+Sans+TC:wght@300;400;500;700&family=ZCOOL+XiaoWei&family=Noto+Serif+TC:wght@400;600&display=swap" rel="stylesheet">
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -73,8 +73,8 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--foam);color:var(--da
 /* Topbar */
 .topbar{background:var(--dark);color:var(--cream);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(0,0,0,.2);}
 .topbar-left{display:flex;align-items:center;gap:10px;}
-.topbar-logo{width:28px;height:28px;object-fit:contain;filter:brightness(1.1);}
-.topbar-brand{font-size:16px;font-weight:700;letter-spacing:.12em;color:var(--cream);}
+.topbar-logo{width:40px;height:40px;object-fit:contain;filter:brightness(1.1);}
+.topbar-brand{font-size:16px;font-weight:400;letter-spacing:.18em;color:var(--cream);font-family:"ZCOOL XiaoWei","Noto Serif TC",serif;}
 .topbar-right{display:flex;align-items:center;gap:10px;}
 .mode-tabs{display:flex;gap:4px;}
 .mode-btn{padding:6px 18px;border:none;border-radius:20px;font-size:13px;font-family:'Noto Sans TC',sans-serif;cursor:pointer;transition:all .2s;font-weight:600;}
@@ -121,7 +121,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--foam);color:var(--da
 .stamp-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:20px;}
 .stamp{aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .3s;border:1.5px solid rgba(255,255,255,.15);overflow:hidden;}
 .stamp.filled{background:rgba(255,255,255,.28);border-color:rgba(255,255,255,.5);}
-.stamp.filled img{width:72%;height:72%;object-fit:contain;filter:brightness(1.1) drop-shadow(0 1px 4px rgba(0,0,0,.2));}
+.stamp.filled img{width:88%;height:88%;object-fit:contain;filter:brightness(1.1) drop-shadow(0 1px 4px rgba(0,0,0,.2));}
 .stamp.empty{background:rgba(255,255,255,.05);}
 .stamp-card-footer{display:flex;justify-content:space-between;align-items:center;}
 .stamp-card-name{font-size:15px;font-weight:700;opacity:.9;}
@@ -643,12 +643,17 @@ function renderStampCard(){
           <div class="stamp-card-name">${currentUser?.displayName||'會員'}</div>
           <div class="stamp-card-sub">累計已集 ${total} 點・已兌換 ${usedCoupons.length} 次</div>
         </div>
-        <div class="stamp-progress">集滿 ${STAMP_MAX} 點換一杯 ☕</div>
+        <div class="stamp-progress" style="font-size:11px;text-align:right;max-width:120px;line-height:1.5;opacity:.55">集滿12點可兌換外帶中杯飲品一杯</div>
       </div>
     </div>
     <div style="background:#fff;border-radius:14px;padding:14px 16px;box-shadow:0 2px 8px rgba(0,0,0,.05);text-align:center;margin-bottom:20px;">
-      <div style="font-size:13px;color:var(--mist);margin-bottom:4px">如何集點？</div>
-      <div style="font-size:14px;font-weight:600">每次消費後掃描店內 QR Code 即可獲得點數 📱</div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px">如何集點？</div>
+      <div style="font-size:13px;color:#666;line-height:1.9;">
+        ・內用/外帶飲品一杯可累積 1 點。<br>
+        ・集滿 12 點可兌換外帶中杯飲品一杯。<br>
+        ・升級大杯或改內用需補差額。<br>
+        ・部分商品或服務不適用優惠券內容。
+      </div>
     </div>
     <div class="coupon-section-title">
       <span>🎫 我的兌換券</span>
