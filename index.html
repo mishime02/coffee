@@ -419,6 +419,30 @@ input[type=range]{width:100%;accent-color:var(--caramel);cursor:pointer;}
 .reprint-btn{padding:8px 16px;background:#E8F0FE;color:#1a73e8;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;width:100%;margin-top:8px;}
 .reprint-btn:hover{background:#d0e4fd;}
 .edit-order-btn{padding:6px 12px;background:#FFF3E0;color:var(--caramel);border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;}
+
+/* 選項群組管理 */
+.option-preset-section{background:#f0f4ff;border-radius:12px;padding:14px;margin-bottom:16px;}
+.option-preset-title{font-size:13px;font-weight:700;margin-bottom:10px;color:#1a73e8;}
+.preset-chip{display:inline-block;padding:6px 14px;border:1.5px solid #1a73e8;border-radius:14px;font-size:12px;font-weight:600;cursor:pointer;margin:3px;color:#1a73e8;background:#fff;font-family:'Noto Sans TC',sans-serif;transition:all .2s;}
+.preset-chip:hover{background:#E8F0FE;}
+
+/* 菜單卡片縮圖 */
+.menu-item-thumb{width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0;margin-right:10px;}
+
+/* 購物車浮動 - 修正為底部固定欄 */
+.cart-bottom-bar{
+  position:fixed;bottom:0;left:0;right:0;
+  background:#fff;padding:12px 16px 20px;
+  box-shadow:0 -4px 16px rgba(0,0,0,.1);
+  z-index:50;display:none;
+  max-width:440px;margin:0 auto;
+}
+.cart-bottom-bar.show{display:block;}
+.cart-bottom-inner{display:flex;align-items:center;gap:10px;}
+.cart-bottom-info{flex:1;}
+.cart-bottom-count{font-size:12px;color:var(--mist);}
+.cart-bottom-total{font-size:16px;font-weight:700;color:var(--dark);}
+.cart-bottom-btn{padding:12px 20px;background:var(--dark);color:#fff;border:none;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -552,6 +576,17 @@ input[type=range]{width:100%;accent-color:var(--caramel);cursor:pointer;}
         <div class="cart-total-row"><span>本次合計</span><span id="cart-sidebar-total" style="color:var(--caramel)">NT$0</span></div>
         <button class="cart-submit-btn" id="cart-sidebar-submit" onclick="submitCartSidebar()">送出訂單</button>
       </div>
+    </div>
+  </div>
+
+  <!-- 客戶端底部購物車欄 -->
+  <div class="cart-bottom-bar" id="cart-bottom-bar">
+    <div class="cart-bottom-inner">
+      <div class="cart-bottom-info">
+        <div class="cart-bottom-count" id="cart-bottom-count">0 項商品</div>
+        <div class="cart-bottom-total" id="cart-bottom-total">NT$0</div>
+      </div>
+      <button class="cart-bottom-btn" onclick="openCartSidebar(currentOrderMode)">🛒 查看購物車</button>
     </div>
   </div>
 
@@ -1236,41 +1271,57 @@ async function renderOrderMenu(){
   await loadMenuItems();
   const items=MENU_ITEMS.filter(m=>!m.deleted);
   const cats=['全部',...new Set(items.map(m=>m.category).filter(Boolean))];
-
-  const cartTotal=Object.entries(orderCart).reduce((s,[id,q])=>{
-    const it=items.find(x=>x.id===id); return it?s+it.price*q:s;},0);
-  const cartCount=Object.values(orderCart).reduce((s,q)=>s+q,0);
-
   const filtered=activeCat==='全部'?items:items.filter(m=>m.category===activeCat);
 
-  document.getElementById('c-order').innerHTML=`
-    <div class="menu-section">
-      <div style="font-size:13px;color:var(--mist);margin-bottom:12px;background:#fff;border-radius:12px;padding:10px 14px;box-shadow:0 2px 8px rgba(0,0,0,.05)">
-        🍽 點完後送出，我們會送餐到桌邊，<strong>離開時再至櫃台結帳</strong>
+  const el=document.getElementById('c-order');
+  el.innerHTML='';
+  const wrap=document.createElement('div');
+  wrap.className='menu-section';
+
+  // 說明
+  const hint=document.createElement('div');
+  hint.style.cssText='font-size:13px;color:var(--mist);margin-bottom:12px;background:#fff;border-radius:12px;padding:10px 14px;box-shadow:0 2px 8px rgba(0,0,0,.05)';
+  hint.innerHTML='🍽 點選商品加入購物車，送出後我們會送餐，<strong>離開時再至櫃台結帳</strong>';
+  wrap.appendChild(hint);
+
+  // 分類欄
+  const catBar=document.createElement('div');
+  catBar.className='menu-cat-bar';
+  catBar.innerHTML=cats.map(c=>`<button class="menu-cat-btn${activeCat===c?' active':''}" onclick="setOrderCat('${c}',this)">${c}</button>`).join('');
+  wrap.appendChild(catBar);
+
+  // 商品列表
+  const list=document.createElement('div');
+  list.className='menu-item-list';
+  filtered.forEach(item=>{
+    const inCart=Object.values(pendingCart).filter(e=>e.id===item.id).reduce((s,e)=>s+e.qty,0);
+    const div=document.createElement('div');
+    div.className='menu-item-card'+(item.available===false?' unavail':'');
+    div.onclick = () => { if(item.available!==false) openItemDetail(item.id,'order'); };
+    div.innerHTML=`
+      <div style="display:flex;align-items:center">
+        ${item.imageBase64?`<img class="menu-item-thumb" src="${item.imageBase64}" alt="${item.name}">`:''}
+        <div class="menu-item-left">
+          <div class="menu-item-name">${item.name}${item.available===false?' <span style="font-size:11px;color:var(--blush)">（暫停供應）</span>':''}</div>
+          ${item.desc?`<div class="menu-item-desc">${item.desc}</div>`:''}
+          <div class="menu-item-price">NT$${item.price}</div>
+        </div>
       </div>
-      <div class="menu-cat-bar">${cats.map(c=>`<button class="menu-cat-btn${activeCat===c?' active':''}" onclick="setOrderCat('${c}',this)">${c}</button>`).join('')}</div>
-      <div class="menu-item-list">${filtered.map(item=>`
-        <div class="menu-item-card${!item.available?' unavail':''}" onclick="${item.available!==false?'openItemDetail(\''+item.id+'\',\'order\')':''}" >
-          <div class="menu-item-left">
-            <div class="menu-item-name">${item.name}${item.available===false?' <span style=\"font-size:11px;color:var(--blush)\">（暫停供應）</span>':''}</div>
-            ${item.desc?`<div class="menu-item-desc">${item.desc}</div>`:''}
-            <div class="menu-item-price">NT\$${item.price}</div>
-          </div>
-          <div class="menu-item-right">
-            ${orderCart[item.id]?`
-              <button class="item-qty-btn" onclick="event.stopPropagation();removeOrderItem('${item.id}')">−</button>
-              <span class="item-qty-num">${orderCart[item.id]}</span>`:''}
-            <button class="item-qty-btn" onclick="event.stopPropagation();addOrderItem('${item.id}')">+</button>
-          </div>
-        </div>`).join('')}
-      </div>
-      ${!items.length?`<div style="text-align:center;padding:40px 0;color:var(--mist)">菜單準備中，請稍後</div>`:''}
-    </div>
-    <button class="cart-float-new" id="cart-float-new" onclick="openCartSidebar('order')" style="display:none">
-      🛒 購物車 <span class="cart-float-badge">0</span>
-    </button>
-  `;
-  updateNewCartFloat();
+      ${inCart?`<div style="background:var(--caramel);color:#fff;border-radius:12px;padding:2px 10px;font-size:12px;font-weight:700;flex-shrink:0">×${inCart}</div>`:'<div style="color:var(--mist);font-size:20px;flex-shrink:0">›</div>'}
+    `;
+    list.appendChild(div);
+  });
+  if(!filtered.length){
+    const empty=document.createElement('div');
+    empty.style.cssText='text-align:center;padding:40px 0;color:var(--mist)';
+    empty.textContent='菜單準備中，請稍後';
+    list.appendChild(empty);
+  }
+  wrap.appendChild(list);
+  el.appendChild(wrap);
+
+  // 底部購物車欄（不放在 innerHTML 中，改為更新獨立的 DOM）
+  updateCartBottomBar();
 }
 
 function setOrderCat(cat,btn){
@@ -1287,39 +1338,54 @@ async function renderShopMenu(){
   await loadShopItems();
   const items=SHOP_ITEMS.filter(m=>!m.deleted);
   const cats=['全部',...new Set(items.map(m=>m.category).filter(Boolean))];
-  const cartCount=Object.values(shopCart).reduce((s,q)=>s+q,0);
-  const cartTotal=Object.entries(shopCart).reduce((s,[id,q])=>{const it=items.find(x=>x.id===id);return it?s+it.price*q:s;},0);
   const filtered=activeShopCat==='全部'?items:items.filter(m=>m.category===activeShopCat);
 
-  document.getElementById('c-shop').innerHTML=`
-    <div class="menu-section">
-      <div style="font-size:13px;color:var(--mist);margin-bottom:12px;background:#fff;border-radius:12px;padding:10px 14px;box-shadow:0 2px 8px rgba(0,0,0,.05)">
-        🛍 選購後送出，商品會送到桌邊，<strong>離開時再至櫃台結帳</strong>
+  const el=document.getElementById('c-shop');
+  el.innerHTML='';
+  const wrap=document.createElement('div');
+  wrap.className='menu-section';
+
+  const hint=document.createElement('div');
+  hint.style.cssText='font-size:13px;color:var(--mist);margin-bottom:12px;background:#fff;border-radius:12px;padding:10px 14px;box-shadow:0 2px 8px rgba(0,0,0,.05)';
+  hint.innerHTML='🛍 選購後送出，商品會送到桌邊，<strong>離開時再至櫃台結帳</strong>';
+  wrap.appendChild(hint);
+
+  const catBar=document.createElement('div');
+  catBar.className='menu-cat-bar';
+  catBar.innerHTML=cats.map(c=>`<button class="menu-cat-btn${activeShopCat===c?' active':''}" onclick="setShopCat('${c}',this)">${c}</button>`).join('');
+  wrap.appendChild(catBar);
+
+  const list=document.createElement('div');
+  list.className='menu-item-list';
+  filtered.forEach(item=>{
+    const inCart=Object.values(pendingCart).filter(e=>e.id===item.id).reduce((s,e)=>s+e.qty,0);
+    const div=document.createElement('div');
+    div.className='menu-item-card'+(item.available===false?' unavail':'');
+    div.onclick = () => { if(item.available!==false) openItemDetail(item.id,'shop'); };
+    div.innerHTML=`
+      <div style="display:flex;align-items:center">
+        ${item.imageBase64?`<img class="menu-item-thumb" src="${item.imageBase64}" alt="${item.name}">`:''}
+        <div class="menu-item-left">
+          <div class="menu-item-name">${item.name}${item.available===false?' <span style="font-size:11px;color:var(--blush)">（售完）</span>':''}</div>
+          ${item.desc?`<div class="menu-item-desc">${item.desc}</div>`:''}
+          <div class="menu-item-price">NT$${item.price}</div>
+        </div>
       </div>
-      <div class="menu-cat-bar">${cats.map(c=>`<button class="menu-cat-btn${activeShopCat===c?' active':''}" onclick="setShopCat('${c}',this)">${c}</button>`).join('')}</div>
-      <div class="menu-item-list">${filtered.map(item=>`
-        <div class="menu-item-card${!item.available?' unavail':''}" onclick="${item.available!==false?'openItemDetail(\''+item.id+'\',\'shop\')':''}">
-          <div class="menu-item-left">
-            <div class="menu-item-name">${item.name}${item.available===false?' <span style=\"font-size:11px;color:var(--blush)\">（售完）</span>':''}</div>
-            ${item.desc?`<div class="menu-item-desc">${item.desc}</div>`:''}
-            <div class="menu-item-price">NT\$${item.price}</div>
-          </div>
-          <div class="menu-item-right">
-            ${shopCart[item.id]?`
-              <button class="item-qty-btn" onclick="event.stopPropagation();removeShopItem('${item.id}')">−</button>
-              <span class="item-qty-num">${shopCart[item.id]}</span>`:''}
-            <button class="item-qty-btn" onclick="event.stopPropagation();addShopItem('${item.id}')">+</button>
-          </div>
-        </div>`).join('')}
-      </div>
-      ${!items.length?`<div style="text-align:center;padding:40px 0;color:var(--mist)">商品上架中，請稍後</div>`:''}
-    </div>
-    <button class="cart-float-new" id="cart-float-new" onclick="openCartSidebar('shop')" style="display:none">
-      🛒 購物車 <span class="cart-float-badge">0</span>
-    </button>
-  `;
-  updateNewCartFloat();
+      ${inCart?`<div style="background:var(--caramel);color:#fff;border-radius:12px;padding:2px 10px;font-size:12px;font-weight:700;flex-shrink:0">×${inCart}</div>`:'<div style="color:var(--mist);font-size:20px;flex-shrink:0">›</div>'}
+    `;
+    list.appendChild(div);
+  });
+  if(!filtered.length){
+    const empty=document.createElement('div');
+    empty.style.cssText='text-align:center;padding:40px 0;color:var(--mist)';
+    empty.textContent='商品上架中，請稍後';
+    list.appendChild(empty);
+  }
+  wrap.appendChild(list);
+  el.appendChild(wrap);
+  updateCartBottomBar();
 }
+
 function setShopCat(cat){ activeShopCat=cat; renderShopMenu(); }
 function addShopItem(id){ shopCart[id]=(shopCart[id]||0)+1; renderShopMenu(); }
 function removeShopItem(id){ shopCart[id]=(shopCart[id]||0)-1; if(shopCart[id]<=0)delete shopCart[id]; renderShopMenu(); }
@@ -1701,11 +1767,13 @@ async function renderAdminMenuMgmt(){
     <label class="img-upload-label" for="mn-img">📷 點擊上傳圖片（選填，建議 < 500KB）</label>
     <input type="file" id="mn-img" accept="image/*" style="display:none" onchange="handleImageUpload(this)">
     <img id="img-preview" class="img-preview" style="display:none" src="">
-    <div id="option-editor-wrap" style="margin-top:12px"></div>
+    <div id="option-preset-section" class="option-preset-section" style="margin-top:12px"></div>
+    <div id="option-editor-wrap" style="margin-top:8px"></div>
     <button class="mgmt-add-btn" style="width:100%;margin-top:10px" onclick="addMenuItem()">新增飲品</button>
   `;
   el.appendChild(formDiv);
   renderOptionEditor();
+  renderOptionPresets();
   // 列表
   const listDiv=document.createElement('div');
   listDiv.className='a-card';
@@ -1793,11 +1861,13 @@ async function renderAdminShopMgmt(){
     <label class="img-upload-label" for="sh-img">📷 點擊上傳圖片（選填，建議 < 500KB）</label>
     <input type="file" id="sh-img" accept="image/*" style="display:none" onchange="handleImageUpload(this)">
     <img id="img-preview" class="img-preview" style="display:none" src="">
-    <div id="option-editor-wrap" style="margin-top:12px"></div>
+    <div id="option-preset-section" class="option-preset-section" style="margin-top:12px"></div>
+    <div id="option-editor-wrap" style="margin-top:8px"></div>
     <button class="mgmt-add-btn" style="width:100%;margin-top:10px" onclick="addShopItemDB()">新增商品</button>
   `;
   el.appendChild(formDiv);
   renderOptionEditor();
+  renderOptionPresets();
   const listDiv=document.createElement('div');
   listDiv.className='a-card';
   let listHtml='<div class="a-card-title">🛍 商品列表</div>';
@@ -1864,6 +1934,127 @@ async function deleteShopItem(id){
 
 
 
+
+
+// ════════════════════════════════════════
+//  選項群組預設庫（管理端）
+// ════════════════════════════════════════
+// 儲存在 Firestore config/optionPresets
+async function loadOptionPresets(){
+  try{
+    const snap = await window._getDoc(window._doc(db,'config','optionPresets'));
+    return snap.exists() ? (snap.data().groups||[]) : [];
+  } catch(e){ return []; }
+}
+async function saveOptionPresets(groups){
+  await window._setDoc(window._doc(db,'config','optionPresets'),{groups});
+}
+
+async function renderOptionPresets(){
+  const el = document.getElementById('option-preset-section');
+  if(!el) return;
+  const presets = await loadOptionPresets();
+  if(!presets.length){
+    el.innerHTML=`<div class="option-preset-title">📋 選項群組庫</div>
+      <div style="font-size:12px;color:var(--mist);margin-bottom:8px">儲存常用選項組，快速套用到商品</div>
+      <button class="add-option-btn" style="background:#1a73e8" onclick="saveCurrentGroupAsPreset()">＋ 將目前選項另存為群組</button>`;
+    return;
+  }
+  el.innerHTML=`<div class="option-preset-title">📋 選項群組庫（點擊套用）</div>
+    <div style="margin-bottom:8px">${presets.map((p,pi)=>`
+      <span class="preset-chip" onclick="applyPreset(${pi})">${p.name}
+        <span style="font-size:10px;opacity:.6">(${p.options.length}選項)</span>
+      </span>
+      <span style="font-size:12px;color:var(--blush);cursor:pointer;margin-right:4px" onclick="deletePreset(${pi})">✕</span>
+    `).join('')}</div>
+    <button class="add-option-btn" style="background:#1a73e8" onclick="saveCurrentGroupAsPreset()">＋ 將目前選項另存為群組</button>`;
+}
+
+async function applyPreset(pi){
+  const presets = await loadOptionPresets();
+  const p = presets[pi];
+  if(!p) return;
+  editingOptionGroups.push(JSON.parse(JSON.stringify(p)));
+  renderOptionEditor();
+  showToast(`已套用「${p.name}」`);
+}
+
+async function saveCurrentGroupAsPreset(){
+  if(!editingOptionGroups.length){ showToast('請先新增選項組'); return; }
+  const name = prompt('群組名稱（例如：溫度選項）');
+  if(!name) return;
+  const presets = await loadOptionPresets();
+  // 把目前所有選項組合並為一個預設
+  const newPreset = { name, options: editingOptionGroups.flatMap(g=>g.options) };
+  // 或直接儲存整個 groups
+  const newGroup = { name, options: editingOptionGroups[0]?.options||[], required: editingOptionGroups[0]?.required||false };
+  presets.push(editingOptionGroups.length===1 ? newGroup : { name, options: editingOptionGroups.flatMap(g=>g.options) });
+  await saveOptionPresets(presets);
+  showToast(`✅ 已儲存群組「${name}」`);
+  renderOptionPresets();
+}
+
+async function deletePreset(pi){
+  if(!confirm('確定刪除此群組？')) return;
+  const presets = await loadOptionPresets();
+  presets.splice(pi,1);
+  await saveOptionPresets(presets);
+  renderOptionPresets();
+}
+
+// ════════════════════════════════════════
+//  圖片壓縮
+// ════════════════════════════════════════
+function compressImage(file, maxWidth, maxHeight, quality){
+  return new Promise((resolve)=>{
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        if(w > maxWidth){ h = Math.round(h * maxWidth/w); w = maxWidth; }
+        if(h > maxHeight){ w = Math.round(w * maxHeight/h); h = maxHeight; }
+        const canvas = document.createElement('canvas');
+        canvas.width=w; canvas.height=h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handleImageUpload(input){
+  const file = input.files[0];
+  if(!file) return;
+  showToast('壓縮圖片中…');
+  // 壓縮到最大 600x600，品質 0.75
+  const compressed = await compressImage(file, 600, 600, 0.75);
+  editingImageBase64 = compressed;
+  const preview = document.getElementById('img-preview');
+  if(preview){ preview.src = compressed; preview.style.display='block'; }
+  const kb = Math.round(compressed.length * 0.75 / 1024);
+  showToast(`✅ 圖片已壓縮（約 ${kb}KB）`);
+}
+
+// ════════════════════════════════════════
+//  底部購物車欄更新
+// ════════════════════════════════════════
+function updateCartBottomBar(){
+  const bar = document.getElementById('cart-bottom-bar');
+  if(!bar) return;
+  const entries = Object.values(pendingCart);
+  const count = entries.reduce((s,e)=>s+e.qty, 0);
+  const total = entries.reduce((s,e)=>s+e.unitPrice*e.qty, 0);
+  if(count > 0){
+    bar.classList.add('show');
+    document.getElementById('cart-bottom-count').textContent = count + ' 項商品';
+    document.getElementById('cart-bottom-total').textContent = 'NT$' + total;
+  } else {
+    bar.classList.remove('show');
+  }
+}
 
 // ════════════════════════════════════════
 //  管理端訂單編輯 & 重新出單
@@ -2052,12 +2243,14 @@ function cartSidebarQty(key, delta){
   if(pendingCart[key].qty === 0) delete pendingCart[key];
   renderCartSidebar();
   updateNewCartFloat();
+  updateCartBottomBar();
 }
 
 function cartSidebarDel(key){
   delete pendingCart[key];
   renderCartSidebar();
   updateNewCartFloat();
+  updateCartBottomBar();
 }
 
 function cartSidebarEdit(key){
@@ -2143,6 +2336,7 @@ function addFromDetail(){
   const selLabel = Object.values(currentDetailSelections).map(v=>v.label).join('、');
   showToast(`已加入 ${item.name}${selLabel?' ('+selLabel+')':''}`);
   updateNewCartFloat();
+  updateCartBottomBar();
   if(item.itemType==='shop') renderShopMenu(); else renderOrderMenu();
 }
 
@@ -2168,6 +2362,7 @@ async function submitCartSidebar(){
   pendingCart = {};
   renderCartSidebar();
   updateNewCartFloat();
+  updateCartBottomBar();
   showToast(`✅ 訂單 #${num} 已送出！`);
 }
 
@@ -2210,7 +2405,9 @@ async function openEditItem(itemId, itemType){
     <input type="file" id="edit-img" accept="image/*" style="display:none" onchange="handleImageUpload(this)">
     ${item.imageBase64?`<img id="img-preview" class="img-preview" src="${item.imageBase64}" style="display:block">`
       :'<img id="img-preview" class="img-preview" style="display:none" src="">'}
-    <div style="margin-top:12px"><div style="font-size:13px;font-weight:700;margin-bottom:8px">客製選項</div>
+    <div style="margin-top:12px">
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px">客製選項</div>
+      <div id="option-preset-section" class="option-preset-section"></div>
       <div id="option-editor-wrap"></div>
     </div>
     <div style="display:flex;gap:10px;margin-top:16px">
@@ -2219,6 +2416,7 @@ async function openEditItem(itemId, itemType){
     </div>
   `;
   renderOptionEditor();
+  renderOptionPresets();
   document.getElementById('edit-item-overlay').classList.add('open');
 }
 
@@ -2417,12 +2615,24 @@ function openItemDetail(itemId, itemType){
 }
 
 function selectOption(groupIdx, optIdx, groupName, label, price){
-  // 更新 UI
-  document.querySelectorAll(`[data-group="${groupIdx}"]`).forEach(el => el.classList.remove('selected'));
   const chip = document.querySelector(`[data-group="${groupIdx}"][data-opt="${optIdx}"]`);
-  if(chip) chip.classList.add('selected');
-  // 儲存選擇
-  currentDetailSelections[groupName] = { label, price };
+  const isSelected = chip && chip.classList.contains('selected');
+
+  // 取得此群組是否必選
+  const item = currentDetailItem;
+  const group = item?.optionGroups?.[groupIdx];
+  const isRequired = group?.required;
+
+  if(isSelected && !isRequired){
+    // 再按一次取消（非必選才可取消）
+    chip.classList.remove('selected');
+    delete currentDetailSelections[groupName];
+  } else {
+    // 選取
+    document.querySelectorAll(`[data-group="${groupIdx}"]`).forEach(el => el.classList.remove('selected'));
+    if(chip) chip.classList.add('selected');
+    currentDetailSelections[groupName] = { label, price };
+  }
   updateDetailPrice();
 }
 
