@@ -481,6 +481,12 @@ input[type=range]{width:100%;accent-color:var(--caramel);cursor:pointer;}
 .order-alert-title{font-size:20px;font-weight:700;margin-bottom:10px;}
 .order-alert-msg{font-size:14px;color:var(--mist);line-height:1.7;margin-bottom:24px;}
 .order-alert-btn{width:100%;padding:14px;background:var(--dark);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;}
+
+/* 登入/登出按鈕縮小右移 */
+.topbar-auth{display:flex;align-items:center;gap:8px;margin-left:auto;}
+.auth-avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;border:1.5px solid var(--caramel);}
+.auth-btn{background:transparent;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7);border-radius:10px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;white-space:nowrap;}
+.auth-btn:hover{opacity:1;color:#fff;border-color:rgba(255,255,255,.6);}
 </style>
 </head>
 <body>
@@ -519,8 +525,10 @@ input[type=range]{width:100%;accent-color:var(--caramel);cursor:pointer;}
         <button class="mode-btn active" onclick="switchMode('client')">客戶端</button>
         <button class="mode-btn" onclick="switchMode('admin')">管理端</button>
       </div>
-      <img class="user-avatar" id="user-avatar" src="" alt="">
-      <button class="logout-btn" onclick="doLogout()">登出</button>
+      <div class="topbar-auth" id="topbar-auth" style="display:none">
+        <img class="auth-avatar" id="user-avatar" src="" alt="">
+        <button class="auth-btn" id="auth-action-btn" onclick="doLogout()">登出</button>
+      </div>
     </div>
   </div>
 
@@ -601,6 +609,7 @@ input[type=range]{width:100%;accent-color:var(--caramel);cursor:pointer;}
         <button class="mgmt-add-btn" style="flex:1;background:var(--sage)" onclick="saveAdminOrderEdit()">儲存修改</button>
         <button class="mgmt-add-btn" style="flex:1;background:#f0ebe4;color:var(--dark)" onclick="closeAdminOrderEdit()">取消</button>
       </div>
+      <button class="mgmt-del-btn" style="width:100%;padding:10px;border-radius:12px;font-size:13px;margin-top:8px" onclick="deleteAdminOrder()">🗑 刪除此訂單</button>
     </div>
   </div>
 
@@ -836,7 +845,10 @@ function showApp(user){
   }
   document.getElementById('client-name').textContent=user.displayName||'會員';
   document.getElementById('client-email').textContent=user.email;
+  // 管理端切換只對管理員顯示
   document.getElementById('mode-tabs').style.display=isAdmin()?'flex':'none';
+  // 顯示登出按鈕區
+  document.getElementById('topbar-auth').style.display='flex';
   renderClientView('c-stamp');
 }
 async function doLogin(){ try{ await window._signIn(auth,new window._GP()); }catch(e){ showToast('登入失敗，請再試一次'); } }
@@ -1547,7 +1559,12 @@ async function submitOrder(){
 // ════════════════════════════════════════
 async function renderAdminOrders(){
   const orders = await loadOrders();
+  // 自動出單：找到新進的 pending 訂單（_lastOrders 之前沒有的）
+  const prevIds = new Set((_lastOrders||[]).map(o=>o.id));
+  const newOrders = orders.filter(o=>o.status==='pending'&&!prevIds.has(o.id));
   _lastOrders = orders; // 快取
+  // 自動出單
+  newOrders.forEach(o=>{ autoprint(o); });
   const pending = orders.filter(o=>o.status==='pending');
   const done = orders.filter(o=>o.status==='done');
 
@@ -1599,7 +1616,6 @@ async function renderAdminOrders(){
           <button class="ticket-done-btn" style="flex:2" onclick="markOrderDone('${o.id}')">✓ 標記完成</button>
           <button class="edit-order-btn" onclick="openAdminOrderEdit('${o.id}')">編輯</button>
         </div>
-        <button class="reprint-btn" onclick="_lastOrders&&openAdminOrderEdit('${o.id}');setTimeout(()=>reprintOrder(),100)">🖨 出單</button>
       `;
       grid.appendChild(div);
     });
@@ -2336,6 +2352,20 @@ async function saveAdminOrderEdit(){
   renderAdminOrders();
 }
 
+function autoprint(o){
+  // 自動出單（目前用 console 記錄，待串接 Prowill 印表機）
+  let content=`=== 自動出單 ===\n#${o.num} ${o.type==='order'?'點餐':'商店'}\n`;
+  (o.items||[]).forEach(it=>{
+    const sel=it.selections?Object.values(it.selections).map(v=>v.label).join('/'):'';
+    content+=`${it.name}${sel?' ('+sel+')':''} x${it.qty}\n`;
+  });
+  content+=`合計：NT$${o.total}`;
+  if(o.note) content+=`\n備註：${o.note}`;
+  console.log('[AutoPrint]', content);
+  // 未來串接印表機時在此呼叫
+  // sendToPrinter(content);
+}
+
 function reprintOrder(){
   if(!editingOrderData) return;
   const o = editingOrderData;
@@ -2354,6 +2384,21 @@ function reprintOrder(){
 function closeAdminOrderEdit(){
   document.getElementById('admin-order-edit-overlay').classList.remove('open');
   editingOrderData = null;
+}
+
+async function deleteAdminOrder(){
+  if(!editingOrderData) return;
+  if(!confirm(`確定刪除訂單 #${editingOrderData.num}？此操作無法復原`)) return;
+  // 標記為已刪除
+  await window._setDoc(window._doc(db,'orders',editingOrderData.id),
+    {...editingOrderData, deleted:true, status:'deleted'});
+  if(_lastOrders){
+    const i=_lastOrders.findIndex(o=>o.id===editingOrderData.id);
+    if(i>=0) _lastOrders.splice(i,1);
+  }
+  showToast('🗑 訂單已刪除');
+  closeAdminOrderEdit();
+  renderAdminOrders();
 }
 
 // 快取最後載入的訂單
@@ -2724,9 +2769,9 @@ function enterAsGuest(){
   document.getElementById('app').classList.add('show');
   // 隱藏管理端切換（非會員不顯示）
   document.getElementById('mode-tabs').style.display='none';
-  // 隱藏 user-avatar 和 logout
-  document.getElementById('user-avatar').style.display='none';
-  document.querySelector('.logout-btn').style.display='none';
+  // 非會員不顯示登出區
+  document.getElementById('topbar-auth').style.display='none';
+  document.getElementById('mode-tabs').style.display='none';
   // 顯示客戶端，預設點餐頁
   document.getElementById('mode-client').style.display='block';
   // 替換 nav pills：非會員只看到點餐和商店
@@ -2740,8 +2785,16 @@ function renderGuestNav(){
   navEl.innerHTML = `
     <button class="pill active" onclick="guestNav('c-order',this)">🍽 點餐</button>
     <button class="pill" onclick="guestNav('c-shop',this)">🛍 商店</button>
-    <button class="pill" onclick="promptLogin()">☕ 會員登入</button>
   `;
+  // 顯示登入按鈕在右側
+  const authEl = document.getElementById('topbar-auth');
+  const btn = document.getElementById('auth-action-btn');
+  if(authEl && btn){
+    authEl.style.display='flex';
+    document.getElementById('user-avatar').style.display='none';
+    btn.textContent='登入集點';
+    btn.onclick = promptLogin;
+  }
 }
 
 function guestNav(id, btn){
