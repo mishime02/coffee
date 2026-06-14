@@ -1616,6 +1616,7 @@ async function renderAdminOrders(){
           <button class="ticket-done-btn" style="flex:2" onclick="markOrderDone('${o.id}')">✓ 標記完成</button>
           <button class="edit-order-btn" onclick="openAdminOrderEdit('${o.id}')">編輯</button>
         </div>
+        <button class="reprint-btn" onclick="openAdminOrderEdit('${o.id}');setTimeout(()=>reprintOrder(),150)">🖨 重新出單</button>
       `;
       grid.appendChild(div);
     });
@@ -1847,7 +1848,7 @@ async function renderAdminMenuMgmt(){
       <input class="mgmt-input" id="mn-price" placeholder="價格" type="number">
       <input class="mgmt-input" id="mn-cat" placeholder="分類（如：咖啡、茶飲）">
     </div>
-    <label class="img-upload-label" for="mn-img">📷 點擊上傳圖片（選填，建議 < 500KB）</label>
+    <label class="img-upload-label" for="mn-img">📷 點擊上傳圖片（選填，最大 5MB，自動壓縮）</label>
     <input type="file" id="mn-img" accept="image/*" style="display:none" onchange="handleImageUpload(this)">
     <img id="img-preview" class="img-preview" style="display:none" src="">
     <div id="option-preset-section" class="option-preset-section" style="margin-top:12px"></div>
@@ -1941,7 +1942,7 @@ async function renderAdminShopMgmt(){
       <input class="mgmt-input" id="sh-price" placeholder="價格" type="number">
       <input class="mgmt-input" id="sh-cat" placeholder="分類（如：咖啡豆、周邊）">
     </div>
-    <label class="img-upload-label" for="sh-img">📷 點擊上傳圖片（選填，建議 < 500KB）</label>
+    <label class="img-upload-label" for="sh-img">📷 點擊上傳圖片（選填，最大 5MB，自動壓縮）</label>
     <input type="file" id="sh-img" accept="image/*" style="display:none" onchange="handleImageUpload(this)">
     <img id="img-preview" class="img-preview" style="display:none" src="">
     <div id="option-preset-section" class="option-preset-section" style="margin-top:12px"></div>
@@ -2111,18 +2112,35 @@ function compressImage(file, maxWidth, maxHeight, quality){
 async function handleImageUpload(input){
   const file = input.files[0];
   if(!file) return;
+  // 拒絕超過 5MB
+  if(file.size > 5 * 1024 * 1024){
+    showToast('圖片超過 5MB，請選擇較小的檔案');
+    input.value='';
+    return;
+  }
   const originalKB = Math.round(file.size / 1024);
-  showToast('處理圖片中…');
-  // 自動壓縮：超過 300KB 降低品質，超過 1MB 縮小尺寸
-  let maxW=800, maxH=800, quality=0.8;
-  if(file.size > 1024*1024){ maxW=600; maxH=600; quality=0.7; }
-  else if(file.size > 500*1024){ quality=0.72; }
-  const compressed = await compressImage(file, maxW, maxH, quality);
+  showToast('壓縮圖片中…');
+  // 目標壓縮至 500KB 以內，逐步降低品質
+  let maxW=800, maxH=800;
+  // 大圖先縮尺寸
+  if(file.size > 3*1024*1024){ maxW=600; maxH=600; }
+  else if(file.size > 1*1024*1024){ maxW=720; maxH=720; }
+  // 先試品質 0.75
+  let compressed = await compressImage(file, maxW, maxH, 0.75);
+  let compressedBytes = compressed.length * 0.75;
+  // 若還超過 500KB，繼續降低品質
+  if(compressedBytes > 500*1024){
+    compressed = await compressImage(file, maxW, maxH, 0.55);
+    compressedBytes = compressed.length * 0.75;
+  }
+  if(compressedBytes > 500*1024){
+    compressed = await compressImage(file, 480, 480, 0.5);
+  }
   editingImageBase64 = compressed;
   const preview = document.getElementById('img-preview');
   if(preview){ preview.src = compressed; preview.style.display='block'; }
   const compressedKB = Math.round(compressed.length * 0.75 / 1024);
-  showToast(`✅ 圖片處理完成（${originalKB}KB → 約${compressedKB}KB）`);
+  showToast(`✅ 壓縮完成（${originalKB}KB → 約${compressedKB}KB）`);
 }
 
 // ════════════════════════════════════════
