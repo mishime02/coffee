@@ -325,6 +325,48 @@ input[type=range]{width:100%;accent-color:var(--caramel);cursor:pointer;}
   .pos-cart{position:static;}
 }
 
+
+/* 非會員按鈕 */
+.login-divider{display:flex;align-items:center;gap:10px;margin:16px 0;}
+.login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:#eee;}
+.login-divider span{font-size:12px;color:var(--mist);}
+.guest-btn{width:100%;padding:14px;border:1.5px solid var(--dark);border-radius:14px;background:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:'Noto Sans TC',sans-serif;color:var(--dark);transition:all .2s;}
+.guest-btn:hover{background:var(--foam);}
+
+/* 商品詳情頁 */
+.item-detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:250;display:none;align-items:flex-end;justify-content:center;}
+.item-detail-overlay.open{display:flex;}
+.item-detail-panel{background:#fff;border-radius:24px 24px 0 0;padding:0 0 32px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;}
+.item-detail-img{width:100%;height:200px;object-fit:cover;border-radius:24px 24px 0 0;}
+.item-detail-img-placeholder{width:100%;height:160px;background:linear-gradient(135deg,var(--cream),#e8e0d5);border-radius:24px 24px 0 0;display:flex;align-items:center;justify-content:center;font-size:64px;}
+.item-detail-body{padding:20px 24px 0;}
+.item-detail-name{font-size:20px;font-weight:700;margin-bottom:6px;}
+.item-detail-desc{font-size:14px;color:var(--mist);margin-bottom:8px;line-height:1.6;}
+.item-detail-price{font-size:22px;font-weight:700;color:var(--caramel);margin-bottom:20px;}
+.option-group{margin-bottom:16px;}
+.option-group-title{font-size:13px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.option-group-title .req-badge{font-size:10px;background:var(--blush);color:#fff;border-radius:6px;padding:1px 6px;font-weight:700;}
+.option-chips{display:flex;flex-wrap:wrap;gap:8px;}
+.option-chip{padding:8px 16px;border:1.5px solid #e0e0e0;border-radius:20px;font-size:13px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;font-weight:500;transition:all .2s;background:#fff;color:var(--dark);}
+.option-chip.selected{border-color:var(--caramel);background:#FFF8F0;color:var(--caramel);font-weight:700;}
+.option-chip .chip-price{font-size:11px;opacity:.75;}
+.item-detail-qty{display:flex;align-items:center;justify-content:center;gap:16px;margin:16px 0;}
+.detail-qty-btn{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--caramel);background:#fff;color:var(--caramel);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;}
+.detail-qty-num{font-size:22px;font-weight:700;min-width:32px;text-align:center;}
+.item-detail-add-btn{width:100%;padding:15px;background:var(--dark);color:#fff;border:none;border-radius:16px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;margin-top:8px;}
+.item-detail-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.4);color:#fff;border:none;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+
+/* 菜單管理：客製選項 */
+.option-editor{background:#f5f0e8;border-radius:12px;padding:14px;margin-bottom:10px;}
+.option-editor-title{font-size:13px;font-weight:700;margin-bottom:10px;}
+.option-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+.option-row .mgmt-input{margin-bottom:0;flex:1;}
+.option-row .price-input{width:80px;flex-shrink:0;}
+.add-option-btn{padding:6px 14px;background:var(--dark);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;}
+.del-option-btn{width:28px;height:28px;border-radius:50%;background:#FEE2E0;color:var(--blush);border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;}
+.img-upload-label{display:block;width:100%;padding:10px;border:2px dashed #e0d8cc;border-radius:10px;text-align:center;font-size:13px;color:var(--mist);cursor:pointer;margin-bottom:10px;}
+.img-upload-label:hover{border-color:var(--caramel);color:var(--caramel);}
+.img-preview{width:100%;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;}
 </style>
 </head>
 <body>
@@ -346,6 +388,8 @@ input[type=range]{width:100%;accent-color:var(--caramel);cursor:pointer;}
       <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
       使用 Google 帳號登入
     </button>
+    <div class="login-divider"><span>或</span></div>
+    <button class="guest-btn" onclick="enterAsGuest()">🍽 非會員直接點餐</button>
     <div class="login-note">登入後將保持登入狀態，集點紀錄安全儲存於雲端</div>
   </div>
 </div>
@@ -416,6 +460,28 @@ input[type=range]{width:100%;accent-color:var(--caramel);cursor:pointer;}
         你的外帶中杯飲品兌換券已成功核銷<br>請向店員取餐，享用你的咖啡 ☕
       </div>
       <button class="panel-btn" onclick="closeSuccessAndRefresh()">回到集點卡</button>
+    </div>
+  </div>
+
+  <!-- 商品詳情 overlay -->
+  <div class="item-detail-overlay" id="item-detail-overlay" onclick="if(event.target===this)closeItemDetail()">
+    <div class="item-detail-panel" id="item-detail-panel">
+      <div style="position:relative">
+        <div id="item-detail-img-wrap"></div>
+        <button class="item-detail-close" onclick="closeItemDetail()">✕</button>
+      </div>
+      <div class="item-detail-body">
+        <div class="item-detail-name" id="item-detail-name"></div>
+        <div class="item-detail-desc" id="item-detail-desc"></div>
+        <div class="item-detail-price" id="item-detail-price"></div>
+        <div id="item-detail-options"></div>
+        <div class="item-detail-qty">
+          <button class="detail-qty-btn" onclick="detailQtyChange(-1)">−</button>
+          <span class="detail-qty-num" id="detail-qty">1</span>
+          <button class="detail-qty-btn" onclick="detailQtyChange(1)">+</button>
+        </div>
+        <button class="item-detail-add-btn" id="item-detail-add-btn" onclick="addFromDetail()">加入訂單</button>
+      </div>
     </div>
   </div>
 
@@ -1091,7 +1157,7 @@ async function renderOrderMenu(){
       </div>
       <div class="menu-cat-bar">${cats.map(c=>`<button class="menu-cat-btn${activeCat===c?' active':''}" onclick="setOrderCat('${c}',this)">${c}</button>`).join('')}</div>
       <div class="menu-item-list">${filtered.map(item=>`
-        <div class="menu-item-card${!item.available?' unavail':''}" onclick="${item.available!==false?'addOrderItem(\''+item.id+'\')':''}" >
+        <div class="menu-item-card${!item.available?' unavail':''}" onclick="${item.available!==false?'openItemDetail(\''+item.id+'\',\'order\')':''}" >
           <div class="menu-item-left">
             <div class="menu-item-name">${item.name}${item.available===false?' <span style=\"font-size:11px;color:var(--blush)\">（暫停供應）</span>':''}</div>
             ${item.desc?`<div class="menu-item-desc">${item.desc}</div>`:''}
@@ -1136,7 +1202,7 @@ async function renderShopMenu(){
       </div>
       <div class="menu-cat-bar">${cats.map(c=>`<button class="menu-cat-btn${activeShopCat===c?' active':''}" onclick="setShopCat('${c}',this)">${c}</button>`).join('')}</div>
       <div class="menu-item-list">${filtered.map(item=>`
-        <div class="menu-item-card${!item.available?' unavail':''}" onclick="${item.available!==false?'addShopItem(\''+item.id+'\')':''}">
+        <div class="menu-item-card${!item.available?' unavail':''}" onclick="${item.available!==false?'openItemDetail(\''+item.id+'\',\'shop\')':''}">
           <div class="menu-item-left">
             <div class="menu-item-name">${item.name}${item.available===false?' <span style=\"font-size:11px;color:var(--blush)\">（售完）</span>':''}</div>
             ${item.desc?`<div class="menu-item-desc">${item.desc}</div>`:''}
@@ -1170,13 +1236,25 @@ function openOrderCart(mode){
   document.getElementById('order-note').value='';
 
   let html='', total=0;
-  Object.entries(cart).forEach(([id,qty])=>{
-    const item=items.find(x=>x.id===id); if(!item)return;
-    total+=item.price*qty;
-    html+=`<div class="order-panel-item">
-      <div><div class="order-panel-name">${item.name}</div><div style="font-size:12px;color:var(--mist)">x${qty}</div></div>
-      <div class="order-panel-price">NT\$${item.price*qty}</div>
-    </div>`;
+  Object.entries(cart).forEach(([key,entry])=>{
+    if(typeof entry==='object'&&entry.qty!==undefined){
+      const sub=entry.unitPrice*entry.qty; total+=sub;
+      const selLabel=entry.selections?Object.values(entry.selections).map(v=>v.label).join('、'):'';
+      html+=`<div class="order-panel-item">
+        <div>
+          <div class="order-panel-name">${entry.name}${selLabel?' ('+selLabel+')':''}</div>
+          <div style="font-size:12px;color:var(--mist)">x${entry.qty} · NT\$${entry.unitPrice}/份</div>
+        </div>
+        <div class="order-panel-price">NT\$${sub}</div>
+      </div>`;
+    } else {
+      const item=items.find(x=>x.id===key); if(!item)return;
+      total+=item.price*entry;
+      html+=`<div class="order-panel-item">
+        <div><div class="order-panel-name">${item.name}</div><div style="font-size:12px;color:var(--mist)">x${entry}</div></div>
+        <div class="order-panel-price">NT\$${item.price*entry}</div>
+      </div>`;
+    }
   });
   document.getElementById('order-cart-items').innerHTML=html;
   document.getElementById('order-cart-total').textContent='NT\$'+total;
@@ -1192,8 +1270,13 @@ async function submitOrder(){
   const btn=document.getElementById('order-submit-btn');
   btn.disabled=true; btn.textContent='送出中…';
 
-  const orderItems=Object.entries(cart).map(([id,qty])=>{
-    const item=items.find(x=>x.id===id); return {id,name:item.name,price:item.price,qty};
+  const orderItems=Object.entries(cart).map(([key,entry])=>{
+    if(typeof entry === 'object' && entry.qty !== undefined){
+      return {id:entry.id,name:entry.name,price:entry.unitPrice,qty:entry.qty,
+              selections:entry.selections||{}};
+    }
+    const item=items.find(x=>x.id===key);
+    return {id:key,name:item.name,price:item.price,qty:entry,selections:{}};
   });
   const total=orderItems.reduce((s,x)=>s+x.price*x.qty,0);
   const num=await getNextOrderNum();
@@ -1236,7 +1319,7 @@ async function submitOrder(){
 async function renderAdminOrders(){
   const orders=await loadOrders();
   const pending=orders.filter(o=>o.status==='pending');
-  const done=orders.filter(o=>o.status==='done').slice(0,10);
+  const done=orders.filter(o=>o.status==='done');
 
   document.getElementById('a-orders').innerHTML=`
     ${pending.length?`<div class="new-order-banner">🔔 目前有 ${pending.length} 筆待處理訂單</div>`:''}
@@ -1257,7 +1340,7 @@ async function renderAdminOrders(){
         <button class="ticket-done-btn" onclick="markOrderDone('${o.id}')">✓ 標記完成</button>
       </div>`).join('')}
     </div>
-    <div class="a-card-title" style="font-size:15px;font-weight:700;margin:20px 0 12px">✅ 已完成（最近10筆）</div>
+    <div class="a-card-title" style="font-size:15px;font-weight:700;margin:20px 0 12px">✅ 已完成（${done.length} 筆）</div>
     <div class="order-tickets">${done.map(o=>`
       <div class="ticket done">
         <div class="ticket-header">
@@ -1349,35 +1432,58 @@ async function posSubmit(){
 async function renderAdminMenuMgmt(){
   await loadMenuItems();
   const items=MENU_ITEMS.filter(m=>!m.deleted);
-  document.getElementById('a-menu-mgmt').innerHTML=`
-    <div class="mgmt-form a-card">
-      <div class="a-card-title">➕ 新增飲品</div>
-      <input class="mgmt-input" id="mn-name" placeholder="飲品名稱">
-      <input class="mgmt-input" id="mn-desc" placeholder="描述（可不填）">
-      <div class="mgmt-row" style="margin-bottom:10px">
-        <input class="mgmt-input" id="mn-price" placeholder="價格" type="number">
-        <input class="mgmt-input" id="mn-cat" placeholder="分類（如：咖啡、茶飲）">
-        <button class="mgmt-add-btn" onclick="addMenuItem()">新增</button>
-      </div>
+  initOptionEditor([]);
+  const el=document.getElementById('a-menu-mgmt');
+  el.innerHTML='';
+  // 新增表單
+  const formDiv=document.createElement('div');
+  formDiv.className='mgmt-form a-card';
+  formDiv.innerHTML=`
+    <div class="a-card-title">➕ 新增飲品</div>
+    <input class="mgmt-input" id="mn-name" placeholder="飲品名稱">
+    <input class="mgmt-input" id="mn-desc" placeholder="描述（可不填）">
+    <div class="mgmt-row" style="margin-bottom:10px">
+      <input class="mgmt-input" id="mn-price" placeholder="價格" type="number">
+      <input class="mgmt-input" id="mn-cat" placeholder="分類（如：咖啡、茶飲）">
     </div>
-    <div class="a-card">
-      <div class="a-card-title">☕ 飲品列表</div>
-      ${!items.length?'<div style="color:var(--mist);font-size:13px">尚無品項</div>':
-        items.map(item=>`
-        <div class="mgmt-item-row">
+    <label class="img-upload-label" for="mn-img">📷 點擊上傳圖片（選填，建議 < 500KB）</label>
+    <input type="file" id="mn-img" accept="image/*" style="display:none" onchange="handleImageUpload(this)">
+    <img id="img-preview" class="img-preview" style="display:none" src="">
+    <div id="option-editor-wrap" style="margin-top:12px"></div>
+    <button class="mgmt-add-btn" style="width:100%;margin-top:10px" onclick="addMenuItem()">新增飲品</button>
+  `;
+  el.appendChild(formDiv);
+  renderOptionEditor();
+  // 列表
+  const listDiv=document.createElement('div');
+  listDiv.className='a-card';
+  let listHtml='<div class="a-card-title">☕ 飲品列表</div>';
+  if(!items.length){
+    listHtml+='<div style="color:var(--mist);font-size:13px">尚無品項</div>';
+  } else {
+    items.forEach(item=>{
+      const imgHtml=item.imageBase64?`<img src="${item.imageBase64}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0">`:'';
+      const optLabel=item.optionGroups&&item.optionGroups.length?` · ${item.optionGroups.length}個選項組`:'';
+      listHtml+=`<div class="mgmt-item-row">
+        <div style="display:flex;align-items:center;gap:10px">
+          ${imgHtml}
           <div>
             <div class="mgmt-item-name">${item.name}</div>
-            <div class="mgmt-item-cat">${item.category||'未分類'}</div>
+            <div class="mgmt-item-cat">${item.category||'未分類'}${optLabel}</div>
           </div>
-          <div style="display:flex;align-items:center;gap:6px">
-            <div class="mgmt-item-price">NT\$${item.price}</div>
-            <button class="avail-toggle ${item.available!==false?'on':'off'}" onclick="toggleMenuAvail('${item.id}',${item.available!==false})">
-              ${item.available!==false?'供應中':'已暫停'}
-            </button>
-            <button class="mgmt-del-btn" onclick="deleteMenuItem('${item.id}')">刪除</button>
-          </div>
-        </div>`).join('')}
-    </div>`;
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div class="mgmt-item-price">NT$${item.price}</div>
+          <button class="avail-toggle ${item.available!==false?'on':'off'}" onclick="toggleMenuAvail('${item.id}',${item.available!==false})">
+            ${item.available!==false?'供應中':'已暫停'}
+          </button>
+          <button class="mgmt-del-btn" onclick="deleteMenuItem('${item.id}')">刪除</button>
+        </div>
+      </div>`;
+    });
+  }
+  listDiv.innerHTML=listHtml;
+  el.appendChild(listDiv);
 }
 
 async function addMenuItem(){
@@ -1387,12 +1493,16 @@ async function addMenuItem(){
   const desc=document.getElementById('mn-desc').value.trim();
   if(!name||!price){showToast('請填寫名稱和價格');return;}
   const id='MN-'+Date.now();
-  await saveMenuItem({id,name,price,category:cat,desc,type:'drink',available:true});
+  const itemData={id,name,price,category:cat,desc,type:'drink',available:true,
+    optionGroups:editingOptionGroups.map(g=>({...g,options:[...g.options]}))};
+  if(editingImageBase64) itemData.imageBase64=editingImageBase64;
+  await saveMenuItem(itemData);
   showToast('✅ 已新增 '+name);
   document.getElementById('mn-name').value='';
   document.getElementById('mn-price').value='';
   document.getElementById('mn-cat').value='';
   document.getElementById('mn-desc').value='';
+  editingImageBase64=null; editingOptionGroups=[];
   renderAdminMenuMgmt();
 }
 async function toggleMenuAvail(id,current){
@@ -1414,36 +1524,58 @@ async function deleteMenuItem(id){
 async function renderAdminShopMgmt(){
   await loadShopItems();
   const items=SHOP_ITEMS.filter(m=>!m.deleted);
-  document.getElementById('a-shop-mgmt').innerHTML=`
-    <div class="mgmt-form a-card">
-      <div class="a-card-title">➕ 新增商品</div>
-      <input class="mgmt-input" id="sh-name" placeholder="商品名稱">
-      <input class="mgmt-input" id="sh-desc" placeholder="描述（可不填）">
-      <div class="mgmt-row" style="margin-bottom:10px">
-        <input class="mgmt-input" id="sh-price" placeholder="價格" type="number">
-        <input class="mgmt-input" id="sh-cat" placeholder="分類（如：咖啡豆、周邊）">
-        <button class="mgmt-add-btn" onclick="addShopItemDB()">新增</button>
-      </div>
+  initOptionEditor([]);
+  const el=document.getElementById('a-shop-mgmt');
+  el.innerHTML='';
+  const formDiv=document.createElement('div');
+  formDiv.className='mgmt-form a-card';
+  formDiv.innerHTML=`
+    <div class="a-card-title">➕ 新增商品</div>
+    <input class="mgmt-input" id="sh-name" placeholder="商品名稱">
+    <input class="mgmt-input" id="sh-desc" placeholder="描述（可不填）">
+    <div class="mgmt-row" style="margin-bottom:10px">
+      <input class="mgmt-input" id="sh-price" placeholder="價格" type="number">
+      <input class="mgmt-input" id="sh-cat" placeholder="分類（如：咖啡豆、周邊）">
     </div>
-    <div class="a-card">
-      <div class="a-card-title">🛍 商品列表</div>
-      ${!items.length?'<div style="color:var(--mist);font-size:13px">尚無商品</div>':
-        items.map(item=>`
-        <div class="mgmt-item-row">
+    <label class="img-upload-label" for="sh-img">📷 點擊上傳圖片（選填，建議 < 500KB）</label>
+    <input type="file" id="sh-img" accept="image/*" style="display:none" onchange="handleImageUpload(this)">
+    <img id="img-preview" class="img-preview" style="display:none" src="">
+    <div id="option-editor-wrap" style="margin-top:12px"></div>
+    <button class="mgmt-add-btn" style="width:100%;margin-top:10px" onclick="addShopItemDB()">新增商品</button>
+  `;
+  el.appendChild(formDiv);
+  renderOptionEditor();
+  const listDiv=document.createElement('div');
+  listDiv.className='a-card';
+  let listHtml='<div class="a-card-title">🛍 商品列表</div>';
+  if(!items.length){
+    listHtml+='<div style="color:var(--mist);font-size:13px">尚無商品</div>';
+  } else {
+    items.forEach(item=>{
+      const imgHtml=item.imageBase64?`<img src="${item.imageBase64}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0">`:'';
+      const optLabel=item.optionGroups&&item.optionGroups.length?` · ${item.optionGroups.length}個選項組`:'';
+      listHtml+=`<div class="mgmt-item-row">
+        <div style="display:flex;align-items:center;gap:10px">
+          ${imgHtml}
           <div>
             <div class="mgmt-item-name">${item.name}</div>
-            <div class="mgmt-item-cat">${item.category||'未分類'}</div>
+            <div class="mgmt-item-cat">${item.category||'未分類'}${optLabel}</div>
           </div>
-          <div style="display:flex;align-items:center;gap:6px">
-            <div class="mgmt-item-price">NT\$${item.price}</div>
-            <button class="avail-toggle ${item.available!==false?'on':'off'}" onclick="toggleShopAvail('${item.id}',${item.available!==false})">
-              ${item.available!==false?'上架中':'已下架'}
-            </button>
-            <button class="mgmt-del-btn" onclick="deleteShopItem('${item.id}')">刪除</button>
-          </div>
-        </div>`).join('')}
-    </div>`;
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div class="mgmt-item-price">NT$${item.price}</div>
+          <button class="avail-toggle ${item.available!==false?'on':'off'}" onclick="toggleShopAvail('${item.id}',${item.available!==false})">
+            ${item.available!==false?'上架中':'已下架'}
+          </button>
+          <button class="mgmt-del-btn" onclick="deleteShopItem('${item.id}')">刪除</button>
+        </div>
+      </div>`;
+    });
+  }
+  listDiv.innerHTML=listHtml;
+  el.appendChild(listDiv);
 }
+
 async function addShopItemDB(){
   const name=document.getElementById('sh-name').value.trim();
   const price=parseInt(document.getElementById('sh-price').value);
@@ -1451,12 +1583,16 @@ async function addShopItemDB(){
   const desc=document.getElementById('sh-desc').value.trim();
   if(!name||!price){showToast('請填寫名稱和價格');return;}
   const id='SH-'+Date.now();
-  await saveMenuItem({id,name,price,category:cat,desc,type:'shop',available:true});
+  const itemData={id,name,price,category:cat,desc,type:'shop',available:true,
+    optionGroups:editingOptionGroups.map(g=>({...g,options:[...g.options]}))};
+  if(editingImageBase64) itemData.imageBase64=editingImageBase64;
+  await saveMenuItem(itemData);
   showToast('✅ 已新增 '+name);
   document.getElementById('sh-name').value='';
   document.getElementById('sh-price').value='';
   document.getElementById('sh-cat').value='';
   document.getElementById('sh-desc').value='';
+  editingImageBase64=null; editingOptionGroups=[];
   renderAdminShopMgmt();
 }
 async function toggleShopAvail(id,current){
@@ -1470,6 +1606,268 @@ async function deleteShopItem(id){
   await saveMenuItem({...item,deleted:true});
   showToast('已刪除');
   renderAdminShopMgmt();
+}
+
+
+// ════════════════════════════════════════
+//  非會員模式
+// ════════════════════════════════════════
+function enterAsGuest(){
+  currentUser = null;
+  document.getElementById('loading').style.display='none';
+  document.getElementById('login-screen').classList.remove('show');
+  document.getElementById('scan-view').style.display='none';
+  document.getElementById('app').classList.add('show');
+  // 隱藏管理端切換（非會員不顯示）
+  document.getElementById('mode-tabs').style.display='none';
+  // 隱藏 user-avatar 和 logout
+  document.getElementById('user-avatar').style.display='none';
+  document.querySelector('.logout-btn').style.display='none';
+  // 顯示客戶端，預設點餐頁
+  document.getElementById('mode-client').style.display='block';
+  // 替換 nav pills：非會員只看到點餐和商店
+  renderGuestNav();
+  renderOrderMenu();
+}
+
+function renderGuestNav(){
+  const navEl = document.querySelector('#mode-client .nav-pills');
+  if(!navEl) return;
+  navEl.innerHTML = `
+    <button class="pill active" onclick="guestNav('c-order',this)">🍽 點餐</button>
+    <button class="pill" onclick="guestNav('c-shop',this)">🛍 商店</button>
+    <button class="pill" onclick="promptLogin()">☕ 登入集點</button>
+  `;
+}
+
+function guestNav(id, btn){
+  document.querySelectorAll('#mode-client .view').forEach(v=>v.classList.remove('show'));
+  document.getElementById(id).classList.add('show');
+  btn.closest('.nav-pills').querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  if(id==='c-order') renderOrderMenu();
+  else if(id==='c-shop') renderShopMenu();
+}
+
+function promptLogin(){
+  // 提示登入以集點
+  document.getElementById('app').classList.remove('show');
+  document.getElementById('login-screen').classList.add('show');
+}
+
+// ════════════════════════════════════════
+//  商品詳情 & 客製選項
+// ════════════════════════════════════════
+let currentDetailItem = null;
+let currentDetailQty = 1;
+let currentDetailSelections = {}; // { groupName: { label, price } }
+
+function openItemDetail(itemId, itemType){
+  const items = itemType==='shop' ? SHOP_ITEMS : MENU_ITEMS;
+  const item = items.find(x=>x.id===itemId);
+  if(!item || item.available===false) return;
+
+  currentDetailItem = {...item, itemType};
+  currentDetailQty = 1;
+  currentDetailSelections = {};
+
+  // 圖片
+  const imgWrap = document.getElementById('item-detail-img-wrap');
+  if(item.imageBase64){
+    imgWrap.innerHTML = `<img class="item-detail-img" src="${item.imageBase64}" alt="${item.name}">`;
+  } else {
+    imgWrap.innerHTML = `<div class="item-detail-img-placeholder">☕</div>`;
+  }
+
+  document.getElementById('item-detail-name').textContent = item.name;
+  document.getElementById('item-detail-desc').textContent = item.desc || '';
+  document.getElementById('item-detail-price').textContent = 'NT$' + item.price;
+  document.getElementById('detail-qty').textContent = '1';
+
+  // 客製選項
+  const optionsEl = document.getElementById('item-detail-options');
+  const groups = item.optionGroups || [];
+  if(!groups.length){
+    optionsEl.innerHTML = '';
+  } else {
+    optionsEl.innerHTML = groups.map((g,gi) => `
+      <div class="option-group">
+        <div class="option-group-title">
+          ${g.name}
+          ${g.required ? '<span class="req-badge">必選</span>' : ''}
+        </div>
+        <div class="option-chips">
+          ${g.options.map((opt,oi) => `
+            <div class="option-chip" data-group="${gi}" data-opt="${oi}"
+              onclick="selectOption(${gi},${oi},'${g.name}','${opt.label}',${opt.price||0})">
+              ${opt.label}
+              ${opt.price ? `<span class="chip-price">+$${opt.price}</span>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+
+    // 預設選第一個必選項
+    groups.forEach((g,gi) => {
+      if(g.required && g.options.length){
+        selectOption(gi, 0, g.name, g.options[0].label, g.options[0].price||0);
+      }
+    });
+  }
+
+  updateDetailPrice();
+  document.getElementById('item-detail-overlay').classList.add('open');
+}
+
+function selectOption(groupIdx, optIdx, groupName, label, price){
+  // 更新 UI
+  document.querySelectorAll(`[data-group="${groupIdx}"]`).forEach(el => el.classList.remove('selected'));
+  const chip = document.querySelector(`[data-group="${groupIdx}"][data-opt="${optIdx}"]`);
+  if(chip) chip.classList.add('selected');
+  // 儲存選擇
+  currentDetailSelections[groupName] = { label, price };
+  updateDetailPrice();
+}
+
+function updateDetailPrice(){
+  if(!currentDetailItem) return;
+  const basePrice = currentDetailItem.price;
+  const addons = Object.values(currentDetailSelections).reduce((s,o)=>s+(o.price||0),0);
+  const total = (basePrice + addons) * currentDetailQty;
+  document.getElementById('item-detail-price').textContent = 'NT$' + total;
+  document.getElementById('item-detail-add-btn').textContent =
+    `加入訂單 NT$${total}`;
+}
+
+function detailQtyChange(delta){
+  currentDetailQty = Math.max(1, currentDetailQty + delta);
+  document.getElementById('detail-qty').textContent = currentDetailQty;
+  updateDetailPrice();
+}
+
+function addFromDetail(){
+  if(!currentDetailItem) return;
+  const item = currentDetailItem;
+  const groups = item.optionGroups || [];
+
+  // 檢查必選項
+  for(const g of groups){
+    if(g.required && !currentDetailSelections[g.name]){
+      showToast(`請選擇${g.name}`); return;
+    }
+  }
+
+  const basePrice = item.price;
+  const addons = Object.values(currentDetailSelections).reduce((s,o)=>s+(o.price||0),0);
+  const unitPrice = basePrice + addons;
+
+  // 組合唯一 key（含選項）
+  const selKey = Object.entries(currentDetailSelections)
+    .map(([k,v])=>`${k}:${v.label}`).join('|');
+  const cartKey = item.id + (selKey ? '::' + selKey : '');
+
+  const cartTarget = item.itemType==='shop' ? shopCart : orderCart;
+
+  if(!cartTarget[cartKey]){
+    cartTarget[cartKey] = {
+      id: item.id,
+      name: item.name,
+      unitPrice,
+      qty: 0,
+      selections: {...currentDetailSelections},
+      selKey
+    };
+  }
+  cartTarget[cartKey].qty += currentDetailQty;
+
+  closeItemDetail();
+  showToast(`已加入 ${item.name}${selKey ? ' ('+Object.values(currentDetailSelections).map(v=>v.label).join('、')+')' : ''}`);
+
+  if(item.itemType==='shop') renderShopMenu();
+  else renderOrderMenu();
+}
+
+function closeItemDetail(){
+  document.getElementById('item-detail-overlay').classList.remove('open');
+  currentDetailItem = null;
+}
+
+// ════════════════════════════════════════
+//  管理端：菜單/商品管理 - 客製選項 & 圖片
+// ════════════════════════════════════════
+// 暫存正在編輯的選項組
+let editingOptionGroups = [];
+let editingImageBase64 = null;
+
+function initOptionEditor(existing){
+  editingOptionGroups = existing ? JSON.parse(JSON.stringify(existing)) : [];
+  editingImageBase64 = null;
+  renderOptionEditor();
+}
+
+function renderOptionEditor(){
+  const el = document.getElementById('option-editor-wrap');
+  if(!el) return;
+  el.innerHTML = editingOptionGroups.map((g,gi) => `
+    <div class="option-editor">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-size:13px;font-weight:700">${g.name}</div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <label style="font-size:12px;display:flex;align-items:center;gap:4px;cursor:pointer">
+            <input type="checkbox" ${g.required?'checked':''} onchange="toggleRequired(${gi},this.checked)"> 必選
+          </label>
+          <button class="del-option-btn" onclick="delOptionGroup(${gi})">×</button>
+        </div>
+      </div>
+      ${g.options.map((opt,oi) => `
+        <div class="option-row">
+          <input class="mgmt-input" value="${opt.label}" onchange="updateOptLabel(${gi},${oi},this.value)" placeholder="選項名稱">
+          <input class="mgmt-input price-input" type="number" value="${opt.price||0}" onchange="updateOptPrice(${gi},${oi},+this.value)" placeholder="加價">
+          <button class="del-option-btn" onclick="delOption(${gi},${oi})">×</button>
+        </div>
+      `).join('')}
+      <button class="add-option-btn" onclick="addOption(${gi})">+ 新增選項</button>
+    </div>
+  `).join('') + `
+    <button class="add-option-btn" style="margin-top:4px;background:var(--caramel)" onclick="addOptionGroup()">+ 新增選項組（如：溫度、配料）</button>
+  `;
+}
+
+function addOptionGroup(){
+  editingOptionGroups.push({ name:'新選項組', options:[{label:'選項1',price:0}], required:false });
+  renderOptionEditor();
+  // 讓 name 可編輯
+  const titles = document.querySelectorAll('.option-editor > div > div:first-child');
+  const last = titles[titles.length-1];
+  if(last){
+    last.setAttribute('contenteditable','true');
+    last.focus();
+    last.onblur = () => {
+      const gi = editingOptionGroups.length-1;
+      editingOptionGroups[gi].name = last.textContent.trim()||'選項組';
+      last.removeAttribute('contenteditable');
+    };
+  }
+}
+function addOption(gi){ editingOptionGroups[gi].options.push({label:'新選項',price:0}); renderOptionEditor(); }
+function delOptionGroup(gi){ editingOptionGroups.splice(gi,1); renderOptionEditor(); }
+function delOption(gi,oi){ editingOptionGroups[gi].options.splice(oi,1); renderOptionEditor(); }
+function updateOptLabel(gi,oi,val){ editingOptionGroups[gi].options[oi].label=val; }
+function updateOptPrice(gi,oi,val){ editingOptionGroups[gi].options[oi].price=val; }
+function toggleRequired(gi,val){ editingOptionGroups[gi].required=val; }
+
+function handleImageUpload(input){
+  const file = input.files[0];
+  if(!file) return;
+  if(file.size > 500*1024){ showToast('圖片請小於 500KB'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    editingImageBase64 = e.target.result;
+    const preview = document.getElementById('img-preview');
+    if(preview){ preview.src = editingImageBase64; preview.style.display='block'; }
+  };
+  reader.readAsDataURL(file);
 }
 
 if(window._fbReady){ initFirebase(); }
