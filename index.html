@@ -367,6 +367,47 @@ input[type=range]{width:100%;accent-color:var(--caramel);cursor:pointer;}
 .img-upload-label{display:block;width:100%;padding:10px;border:2px dashed #e0d8cc;border-radius:10px;text-align:center;font-size:13px;color:var(--mist);cursor:pointer;margin-bottom:10px;}
 .img-upload-label:hover{border-color:var(--caramel);color:var(--caramel);}
 .img-preview{width:100%;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px;}
+
+/* 編輯商品 overlay */
+.edit-item-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300;display:none;align-items:flex-end;justify-content:center;}
+.edit-item-overlay.open{display:flex;}
+.edit-item-panel{background:#fff;border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:560px;max-height:88vh;overflow-y:auto;}
+
+/* 購物車側邊欄（客戶端） */
+.cart-sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:none;justify-content:flex-end;}
+.cart-sidebar-overlay.open{display:flex;}
+.cart-sidebar{background:#fff;width:min(400px,100vw);max-height:100vh;overflow-y:auto;padding:24px 20px 40px;display:flex;flex-direction:column;}
+.cart-sidebar-title{font-size:18px;font-weight:700;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;}
+.cart-sidebar-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--mist);}
+.cart-section-label{font-size:12px;font-weight:700;color:var(--mist);letter-spacing:.08em;text-transform:uppercase;margin:14px 0 8px;padding-bottom:4px;border-bottom:1px solid #f0ebe4;}
+.cart-entry{background:#faf8f5;border-radius:12px;padding:12px 14px;margin-bottom:8px;}
+.cart-entry-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+.cart-entry-name{font-weight:700;font-size:14px;}
+.cart-entry-sel{font-size:12px;color:var(--mist);margin-top:2px;}
+.cart-entry-price{font-weight:700;color:var(--caramel);font-size:14px;flex-shrink:0;margin-left:8px;}
+.cart-entry-controls{display:flex;align-items:center;gap:8px;margin-top:8px;}
+.cart-qty-btn{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--caramel);background:#fff;color:var(--caramel);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;}
+.cart-qty-num{font-weight:700;font-size:14px;min-width:20px;text-align:center;}
+.cart-edit-btn{padding:4px 12px;background:#FFF3E0;color:var(--caramel);border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;}
+.cart-del-btn{padding:4px 12px;background:#FEE2E0;color:var(--blush);border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;margin-left:auto;}
+.cart-sent-entry{background:#f5f5f5;border-radius:12px;padding:10px 14px;margin-bottom:6px;opacity:.7;}
+.cart-sent-label{font-size:11px;font-weight:700;color:var(--sage);margin-bottom:4px;}
+.cart-total-bar{margin-top:auto;padding-top:14px;border-top:1.5px solid #f0ebe4;}
+.cart-total-row{display:flex;justify-content:space-between;font-size:16px;font-weight:700;margin-bottom:12px;}
+.cart-submit-btn{width:100%;padding:15px;background:var(--dark);color:#fff;border:none;border-radius:16px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;}
+.cart-submit-btn:disabled{background:#ccc;cursor:not-allowed;}
+.cart-float-new{position:fixed;bottom:24px;right:20px;background:var(--dark);color:#fff;border:none;border-radius:24px;padding:12px 20px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 6px 20px rgba(0,0,0,.25);z-index:50;font-family:'Noto Sans TC',sans-serif;}
+.cart-float-badge{background:var(--caramel);border-radius:10px;padding:1px 8px;font-size:12px;}
+
+/* POS 客製選項 */
+.pos-option-group{margin-bottom:10px;}
+.pos-option-title{font-size:12px;font-weight:700;margin-bottom:6px;color:var(--dark2);}
+.pos-option-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.pos-chip{padding:5px 12px;border:1.5px solid #ddd;border-radius:14px;font-size:12px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;background:#fff;transition:all .2s;}
+.pos-chip.selected{border-color:var(--caramel);background:#FFF8F0;color:var(--caramel);font-weight:700;}
+.pos-item-expand{background:#f5f0e8;border-radius:12px;padding:12px;margin-bottom:8px;}
+.pos-item-expand-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;cursor:pointer;}
+.pos-qty-row{display:flex;align-items:center;gap:10px;margin-top:10px;}
 </style>
 </head>
 <body>
@@ -460,6 +501,30 @@ input[type=range]{width:100%;accent-color:var(--caramel);cursor:pointer;}
         你的外帶中杯飲品兌換券已成功核銷<br>請向店員取餐，享用你的咖啡 ☕
       </div>
       <button class="panel-btn" onclick="closeSuccessAndRefresh()">回到集點卡</button>
+    </div>
+  </div>
+
+  <!-- 編輯商品 overlay（管理端） -->
+  <div class="edit-item-overlay" id="edit-item-overlay" onclick="if(event.target===this)closeEditItem()">
+    <div class="edit-item-panel">
+      <div class="panel-handle"></div>
+      <div class="panel-title" id="edit-item-title">編輯商品</div>
+      <div id="edit-item-body"></div>
+    </div>
+  </div>
+
+  <!-- 購物車側邊欄（客戶端） -->
+  <div class="cart-sidebar-overlay" id="cart-sidebar-overlay" onclick="if(event.target===this)closeCartSidebar()">
+    <div class="cart-sidebar">
+      <div class="cart-sidebar-title">
+        🛒 我的訂單
+        <button class="cart-sidebar-close" onclick="closeCartSidebar()">✕</button>
+      </div>
+      <div id="cart-sidebar-body"></div>
+      <div class="cart-total-bar">
+        <div class="cart-total-row"><span>本次合計</span><span id="cart-sidebar-total" style="color:var(--caramel)">NT$0</span></div>
+        <button class="cart-submit-btn" id="cart-sidebar-submit" onclick="submitCartSidebar()">送出訂單</button>
+      </div>
     </div>
   </div>
 
@@ -755,8 +820,9 @@ function clientNav(id,btn){
   document.getElementById(id).classList.add('show');
   btn.closest('.nav-pills').querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
   btn.classList.add('active');
-  if(id==='c-order') renderOrderMenu();
-  else if(id==='c-shop') renderShopMenu();
+  // 切換分類時重置購物車追蹤
+  if(id==='c-order'){ currentOrderMode='order'; renderOrderMenu(); }
+  else if(id==='c-shop'){ currentOrderMode='shop'; renderShopMenu(); }
   else renderClientView(id);
 }
 function adminNav(id,btn){
@@ -1173,8 +1239,11 @@ async function renderOrderMenu(){
       </div>
       ${!items.length?`<div style="text-align:center;padding:40px 0;color:var(--mist)">菜單準備中，請稍後</div>`:''}
     </div>
-    ${cartCount>0?`<button class="order-float" onclick="openOrderCart('order')">🛒 查看訂單 <span class="order-float-badge">${cartCount} 項・NT\$${cartTotal}</span></button>`:''}
+    <button class="cart-float-new" id="cart-float-new" onclick="openCartSidebar('order')" style="display:none">
+      🛒 購物車 <span class="cart-float-badge">0</span>
+    </button>
   `;
+  updateNewCartFloat();
 }
 
 function setOrderCat(cat,btn){
@@ -1218,8 +1287,11 @@ async function renderShopMenu(){
       </div>
       ${!items.length?`<div style="text-align:center;padding:40px 0;color:var(--mist)">商品上架中，請稍後</div>`:''}
     </div>
-    ${cartCount>0?`<button class="order-float" onclick="openOrderCart('shop')">🛒 查看購物車 <span class="order-float-badge">${cartCount} 項・NT\$${cartTotal}</span></button>`:''}
+    <button class="cart-float-new" id="cart-float-new" onclick="openCartSidebar('shop')" style="display:none">
+      🛒 購物車 <span class="cart-float-badge">0</span>
+    </button>
   `;
+  updateNewCartFloat();
 }
 function setShopCat(cat){ activeShopCat=cat; renderShopMenu(); }
 function addShopItem(id){ shopCart[id]=(shopCart[id]||0)+1; renderShopMenu(); }
@@ -1372,44 +1444,124 @@ let posCart={};
 async function renderAdminPOS(){
   await loadMenuItems();
   const items=MENU_ITEMS.filter(m=>!m.deleted&&m.available!==false);
-  const posTotal=Object.entries(posCart).reduce((s,[id,q])=>{const it=items.find(x=>x.id===id);return it?s+it.price*q:s;},0);
-  const posCount=Object.values(posCart).reduce((s,q)=>s+q,0);
+  const posTotal=Object.entries(posCart).reduce((s,[k,e])=>s+(typeof e==='object'?e.unitPrice*e.qty:0),0);
+  const posCount=Object.values(posCart).reduce((s,e)=>s+(typeof e==='object'?e.qty:e),0);
 
-  document.getElementById('a-pos').innerHTML=`
-    <div class="pos-wrap">
-      <div class="pos-menu">
-        <div class="a-card-title">🍽 選擇品項</div>
-        ${items.map(item=>`
-          <div class="pos-item-card" onclick="posAddItem('${item.id}')">
-            <div>
-              <div style="font-weight:600;font-size:14px">${item.name}</div>
-              <div style="font-size:12px;color:var(--caramel)">NT\$${item.price}</div>
-            </div>
-            ${posCart[item.id]?`<span style="background:var(--caramel);color:#fff;border-radius:12px;padding:2px 10px;font-weight:700;font-size:13px">x${posCart[item.id]}</span>`:'<span style="color:var(--mist);font-size:20px">+</span>'}
-          </div>`).join('')}
-      </div>
-      <div class="pos-cart">
-        <div class="pos-cart-title">🧾 目前訂單</div>
-        ${!posCount?`<div class="pos-cart-empty">點擊左側品項加入</div>`:
-          Object.entries(posCart).map(([id,qty])=>{
-            const it=items.find(x=>x.id===id); if(!it)return'';
-            return`<div class="pos-cart-item">
-              <div>
-                <div style="font-weight:600;font-size:13px">${it.name}</div>
-                <div style="font-size:12px;color:var(--mist)">x${qty}</div>
+  const el=document.getElementById('a-pos');
+  el.innerHTML='';
+
+  const wrap=document.createElement('div');
+  wrap.className='pos-wrap';
+
+  // 左側：菜單
+  const menuDiv=document.createElement('div');
+  menuDiv.className='pos-menu';
+  let menuHtml='<div class="a-card-title">🍽 選擇品項</div>';
+  items.forEach(item=>{
+    const groups=item.optionGroups||[];
+    const isExpanded=posExpanded===item.id;
+    const qty=posQty[item.id]||1;
+    const sels=posSelections[item.id]||{};
+    const selLabel=Object.values(sels).map(v=>v.label).join('、');
+
+    if(!groups.length){
+      // 無選項：直接加入
+      menuHtml+=`<div class="pos-item-card" onclick="posAddItemDirect('${item.id}')">
+        <div>
+          <div style="font-weight:600;font-size:14px">${item.name}</div>
+          <div style="font-size:12px;color:var(--caramel)">NT$${item.price}</div>
+        </div>
+        <span style="color:var(--mist);font-size:20px">+</span>
+      </div>`;
+    } else {
+      // 有選項：可展開
+      menuHtml+=`<div class="pos-item-expand">
+        <div class="pos-item-expand-header" onclick="posToggleExpand('${item.id}')">
+          <div>
+            <div style="font-weight:600;font-size:14px">${item.name}</div>
+            <div style="font-size:12px;color:var(--caramel)">NT$${item.price}${selLabel?' · '+selLabel:''}</div>
+          </div>
+          <span style="color:var(--mist)">${isExpanded?'▲':'▼'}</span>
+        </div>
+        ${isExpanded?`
+          ${groups.map((g,gi)=>`
+            <div class="pos-option-group">
+              <div class="pos-option-title">${g.name}${g.required?'<span style="color:var(--blush);margin-left:4px">*必選</span>':''}</div>
+              <div class="pos-option-chips">
+                ${g.options.map((opt,oi)=>`
+                  <div class="pos-chip ${sels[g.name]?.label===opt.label?'selected':''}"
+                    onclick="posSelectOption('${item.id}',${gi},${oi},'${g.name}','${opt.label}',${opt.price||0})">
+                    ${opt.label}${opt.price?` +$${opt.price}`:''}
+                  </div>`).join('')}
               </div>
-              <div style="display:flex;align-items:center;gap:6px">
-                <div style="font-weight:700;color:var(--caramel);font-size:13px">NT\$${it.price*qty}</div>
-                <button class="item-qty-btn" style="width:24px;height:24px;font-size:14px" onclick="posRemoveItem('${id}')">−</button>
-              </div>
-            </div>`;}).join('')}
-        ${posCount?`<div class="pos-total"><span>合計</span><span style="color:var(--caramel)">NT\$${posTotal}</span></div>
-        <textarea class="order-note-input" id="pos-note" placeholder="備註" rows="2" style="margin-bottom:10px"></textarea>
-        <button class="pos-submit" onclick="posSubmit()">送出訂單並出單</button>
-        <button class="pos-clear" onclick="posClear()">清空</button>`:''}
-      </div>
-    </div>`;
+            </div>`).join('')}
+          <div class="pos-qty-row">
+            <button class="item-qty-btn" onclick="posSetQty('${item.id}',-1)">−</button>
+            <span class="qty-num" style="font-size:15px;font-weight:700;min-width:24px;text-align:center">${qty}</span>
+            <button class="item-qty-btn" onclick="posSetQty('${item.id}',1)">+</button>
+            <button class="mgmt-add-btn" style="margin-left:auto" onclick="posAddItemWithOptions('${item.id}')">加入訂單</button>
+          </div>
+        `:''}
+      </div>`;
+    }
+  });
+  menuDiv.innerHTML=menuHtml;
+
+  // 右側：購物車
+  const cartDiv=document.createElement('div');
+  cartDiv.className='pos-cart';
+  let cartHtml=`<div class="pos-cart-title">🧾 目前訂單</div>`;
+
+  if(!posCount){
+    cartHtml+=`<div class="pos-cart-empty">點擊左側品項加入</div>`;
+  } else {
+    Object.entries(posCart).forEach(([key,entry])=>{
+      const e=typeof entry==='object'?entry:{id:key,name:key,unitPrice:0,qty:entry,selections:{}};
+      const selLabel=e.selections?Object.values(e.selections).map(v=>v.label).join('、'):'';
+      cartHtml+=`<div class="pos-cart-item">
+        <div style="flex:1">
+          <div style="font-weight:600;font-size:13px">${e.name}</div>
+          ${selLabel?`<div style="font-size:11px;color:var(--mist)">${selLabel}</div>`:''}
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <button class="item-qty-btn" style="width:24px;height:24px;font-size:14px" onclick="posCartQty('${key}',-1)">−</button>
+          <span style="font-weight:700;font-size:13px">${e.qty}</span>
+          <button class="item-qty-btn" style="width:24px;height:24px;font-size:14px" onclick="posCartQty('${key}',1)">+</button>
+          <div style="font-weight:700;color:var(--caramel);font-size:13px;min-width:50px;text-align:right">NT$${e.unitPrice*e.qty}</div>
+          <button class="mgmt-del-btn" onclick="posCartDel('${key}')">✕</button>
+        </div>
+      </div>`;
+    });
+    cartHtml+=`<div class="pos-total"><span>合計</span><span style="color:var(--caramel)">NT$${posTotal}</span></div>
+    <textarea class="order-note-input" id="pos-note" placeholder="備註" rows="2" style="margin-bottom:10px"></textarea>
+    <button class="pos-submit" onclick="posSubmit()">送出訂單並出單</button>
+    <button class="pos-clear" onclick="posClearAll()">🗑 清空整單</button>`;
+  }
+  cartDiv.innerHTML=cartHtml;
+
+  wrap.appendChild(menuDiv);
+  wrap.appendChild(cartDiv);
+  el.appendChild(wrap);
 }
+
+function posAddItemDirect(id){
+  const item=MENU_ITEMS.find(x=>x.id===id); if(!item)return;
+  const cartKey=id;
+  if(!posCart[cartKey]) posCart[cartKey]={id,name:item.name,unitPrice:item.price,qty:0,selections:{},selKey:''};
+  posCart[cartKey].qty++;
+  renderAdminPOS();
+}
+
+function posCartQty(key,delta){
+  if(!posCart[key])return;
+  if(typeof posCart[key]==='object') posCart[key].qty=Math.max(0,posCart[key].qty+delta);
+  else posCart[key]=Math.max(0,posCart[key]+delta);
+  if((posCart[key].qty||posCart[key])<=0) delete posCart[key];
+  renderAdminPOS();
+}
+
+function posCartDel(key){ delete posCart[key]; renderAdminPOS(); }
+
 function posAddItem(id){ posCart[id]=(posCart[id]||0)+1; renderAdminPOS(); }
 function posRemoveItem(id){ posCart[id]=(posCart[id]||0)-1; if(posCart[id]<=0)delete posCart[id]; renderAdminPOS(); }
 function posClear(){ posCart={}; renderAdminPOS(); }
@@ -1477,7 +1629,8 @@ async function renderAdminMenuMgmt(){
           <button class="avail-toggle ${item.available!==false?'on':'off'}" onclick="toggleMenuAvail('${item.id}',${item.available!==false})">
             ${item.available!==false?'供應中':'已暫停'}
           </button>
-          <button class="mgmt-del-btn" onclick="deleteMenuItem('${item.id}')">刪除</button>
+          <button class="avail-toggle on" style="background:#E8F0FE;color:#1a73e8" onclick="openEditItem('${item.id}','drink')">編輯</button>
+            <button class="mgmt-del-btn" onclick="deleteMenuItem('${item.id}')">刪除</button>
         </div>
       </div>`;
     });
@@ -1567,6 +1720,7 @@ async function renderAdminShopMgmt(){
           <button class="avail-toggle ${item.available!==false?'on':'off'}" onclick="toggleShopAvail('${item.id}',${item.available!==false})">
             ${item.available!==false?'上架中':'已下架'}
           </button>
+          <button class="avail-toggle on" style="background:#E8F0FE;color:#1a73e8" onclick="openEditItem('${item.id}','shop')">編輯</button>
           <button class="mgmt-del-btn" onclick="deleteShopItem('${item.id}')">刪除</button>
         </div>
       </div>`;
@@ -1608,6 +1762,343 @@ async function deleteShopItem(id){
   renderAdminShopMgmt();
 }
 
+
+
+// ════════════════════════════════════════
+//  客戶端購物車側邊欄
+// ════════════════════════════════════════
+// pendingCart: 尚未送出的品項 { key: {id,name,unitPrice,qty,selections,selKey} }
+// sentOrders: 已送出的訂單列表 [{num, items}]
+let pendingCart = {};   // 當前未送出
+let sentOrders = [];    // 本次已送出（顯示用）
+let currentOrderMode = 'order';
+
+function openCartSidebar(mode){
+  currentOrderMode = mode || currentOrderMode;
+  renderCartSidebar();
+  document.getElementById('cart-sidebar-overlay').classList.add('open');
+}
+function closeCartSidebar(){
+  document.getElementById('cart-sidebar-overlay').classList.remove('open');
+}
+
+function renderCartSidebar(){
+  const body = document.getElementById('cart-sidebar-body');
+  const items = currentOrderMode==='shop' ? SHOP_ITEMS : MENU_ITEMS;
+  let html = '';
+  let pendingTotal = 0;
+
+  // 已送出的訂單
+  if(sentOrders.length){
+    html += '<div class="cart-section-label">✅ 已送出</div>';
+    sentOrders.forEach(ord => {
+      html += `<div class="cart-sent-entry">
+        <div class="cart-sent-label">訂單 #${ord.num}</div>`;
+      ord.items.forEach(it => {
+        const selLabel = it.selections ? Object.values(it.selections).map(v=>v.label).join('、') : '';
+        html += `<div style="font-size:13px;display:flex;justify-content:space-between">
+          <span>${it.name}${selLabel?' ('+selLabel+')':''} ×${it.qty}</span>
+          <span style="color:var(--mist)">NT$${it.price*it.qty}</span>
+        </div>`;
+      });
+      html += '</div>';
+    });
+  }
+
+  // 待送出品項
+  const pendingEntries = Object.entries(pendingCart);
+  if(pendingEntries.length){
+    html += '<div class="cart-section-label">🕐 待送出</div>';
+    pendingEntries.forEach(([key, entry]) => {
+      pendingTotal += entry.unitPrice * entry.qty;
+      const selLabel = entry.selections ? Object.values(entry.selections).map(v=>v.label).join('、') : '';
+      const hasOptions = currentDetailItem || (MENU_ITEMS.find(x=>x.id===entry.id)||SHOP_ITEMS.find(x=>x.id===entry.id))?.optionGroups?.length > 0;
+      html += `<div class="cart-entry">
+        <div class="cart-entry-top">
+          <div>
+            <div class="cart-entry-name">${entry.name}</div>
+            ${selLabel?`<div class="cart-entry-sel">${selLabel}</div>`:''}
+          </div>
+          <div class="cart-entry-price">NT$${entry.unitPrice * entry.qty}</div>
+        </div>
+        <div class="cart-entry-controls">
+          <button class="cart-qty-btn" onclick="cartSidebarQty('${key}',-1)">−</button>
+          <span class="cart-qty-num">${entry.qty}</span>
+          <button class="cart-qty-btn" onclick="cartSidebarQty('${key}',1)">+</button>
+          <button class="cart-edit-btn" onclick="cartSidebarEdit('${key}')">修改選項</button>
+          <button class="cart-del-btn" onclick="cartSidebarDel('${key}')">刪除</button>
+        </div>
+      </div>`;
+    });
+  } else if(!sentOrders.length){
+    html += '<div style="text-align:center;padding:32px 0;color:var(--mist);font-size:14px">購物車是空的<br>請先加入商品</div>';
+  }
+
+  body.innerHTML = html;
+  document.getElementById('cart-sidebar-total').textContent = 'NT$' + pendingTotal;
+  const submitBtn = document.getElementById('cart-sidebar-submit');
+  submitBtn.disabled = pendingEntries.length === 0;
+  submitBtn.textContent = pendingEntries.length ? `送出訂單 NT$${pendingTotal}` : '購物車是空的';
+}
+
+function cartSidebarQty(key, delta){
+  if(!pendingCart[key]) return;
+  pendingCart[key].qty = Math.max(0, pendingCart[key].qty + delta);
+  if(pendingCart[key].qty === 0) delete pendingCart[key];
+  renderCartSidebar();
+  updateNewCartFloat();
+}
+
+function cartSidebarDel(key){
+  delete pendingCart[key];
+  renderCartSidebar();
+  updateNewCartFloat();
+}
+
+function cartSidebarEdit(key){
+  const entry = pendingCart[key];
+  if(!entry) return;
+  const items = currentOrderMode==='shop' ? SHOP_ITEMS : MENU_ITEMS;
+  const item = items.find(x=>x.id===entry.id);
+  if(!item || !item.optionGroups || !item.optionGroups.length){
+    showToast('此商品沒有可修改的選項'); return;
+  }
+  // 開啟詳情頁預填選項
+  closeCartSidebar();
+  currentDetailItem = {...item, itemType: currentOrderMode, _editKey: key};
+  currentDetailQty = entry.qty;
+  currentDetailSelections = entry.selections ? {...entry.selections} : {};
+
+  // 填圖片
+  const imgWrap = document.getElementById('item-detail-img-wrap');
+  imgWrap.innerHTML = item.imageBase64
+    ? `<img class="item-detail-img" src="${item.imageBase64}" alt="${item.name}">`
+    : `<div class="item-detail-img-placeholder">☕</div>`;
+  document.getElementById('item-detail-name').textContent = item.name;
+  document.getElementById('item-detail-desc').textContent = item.desc || '';
+  document.getElementById('detail-qty').textContent = entry.qty;
+
+  const optionsEl = document.getElementById('item-detail-options');
+  const groups = item.optionGroups || [];
+  optionsEl.innerHTML = groups.map((g,gi) => `
+    <div class="option-group">
+      <div class="option-group-title">${g.name}${g.required?'<span class="req-badge">必選</span>':''}</div>
+      <div class="option-chips">
+        ${g.options.map((opt,oi) => `
+          <div class="option-chip" data-group="${gi}" data-opt="${oi}"
+            onclick="selectOption(${gi},${oi},'${g.name}','${opt.label}',${opt.price||0})">
+            ${opt.label}${opt.price?`<span class="chip-price">+$${opt.price}</span>`:''}
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+
+  // 預選已有的選項
+  groups.forEach((g,gi) => {
+    const prev = currentDetailSelections[g.name];
+    if(prev){
+      const oi = g.options.findIndex(o=>o.label===prev.label);
+      if(oi>=0){
+        document.querySelector(`[data-group="${gi}"][data-opt="${oi}"]`)?.classList.add('selected');
+      }
+    } else if(g.required && g.options.length){
+      selectOption(gi,0,g.name,g.options[0].label,g.options[0].price||0);
+    }
+  });
+
+  updateDetailPrice();
+  document.getElementById('item-detail-overlay').classList.add('open');
+}
+
+// 修改 addFromDetail 支援編輯模式
+const _origAddFromDetail = window.addFromDetail;
+
+function addFromDetail(){
+  if(!currentDetailItem) return;
+  const item = currentDetailItem;
+  const groups = item.optionGroups || [];
+  for(const g of groups){
+    if(g.required && !currentDetailSelections[g.name]){ showToast(`請選擇${g.name}`); return; }
+  }
+  const addons = Object.values(currentDetailSelections).reduce((s,o)=>s+(o.price||0),0);
+  const unitPrice = item.price + addons;
+  const selKey = Object.entries(currentDetailSelections).map(([k,v])=>`${k}:${v.label}`).join('|');
+  const cartKey = item.id + (selKey ? '::' + selKey : '');
+
+  // 若是編輯模式，先刪舊的
+  if(item._editKey && item._editKey !== cartKey){
+    delete pendingCart[item._editKey];
+  }
+
+  pendingCart[cartKey] = {
+    id: item.id, name: item.name, unitPrice, qty: currentDetailQty,
+    selections: {...currentDetailSelections}, selKey
+  };
+
+  closeItemDetail();
+  const selLabel = Object.values(currentDetailSelections).map(v=>v.label).join('、');
+  showToast(`已加入 ${item.name}${selLabel?' ('+selLabel+')':''}`);
+  updateNewCartFloat();
+  if(item.itemType==='shop') renderShopMenu(); else renderOrderMenu();
+}
+
+async function submitCartSidebar(){
+  const pendingEntries = Object.entries(pendingCart);
+  if(!pendingEntries.length) return;
+  const items = currentOrderMode==='shop' ? SHOP_ITEMS : MENU_ITEMS;
+  const note = '';
+  const orderItems = pendingEntries.map(([key,entry]) => ({
+    id:entry.id, name:entry.name, price:entry.unitPrice, qty:entry.qty,
+    selections:entry.selections||{}
+  }));
+  const total = orderItems.reduce((s,x)=>s+x.price*x.qty,0);
+  const num = await getNextOrderNum();
+  await submitOrderToDB({
+    num, type: currentOrderMode, items: orderItems, total, note,
+    memberName: currentUser?.displayName||'訪客',
+    memberId: currentUser?.uid||''
+  });
+
+  // 移至已送出
+  sentOrders.push({ num, items: orderItems });
+  pendingCart = {};
+  renderCartSidebar();
+  updateNewCartFloat();
+  showToast(`✅ 訂單 #${num} 已送出！`);
+}
+
+function updateNewCartFloat(){
+  const count = Object.values(pendingCart).reduce((s,e)=>s+e.qty,0);
+  const floatBtn = document.getElementById('cart-float-new');
+  if(floatBtn){
+    floatBtn.style.display = count > 0 ? 'flex' : 'none';
+    const badge = floatBtn.querySelector('.cart-float-badge');
+    if(badge) badge.textContent = count;
+  }
+}
+
+// ════════════════════════════════════════
+//  管理端：編輯現有商品
+// ════════════════════════════════════════
+let editingItemId = null;
+let editingItemType = null;
+
+async function openEditItem(itemId, itemType){
+  editingItemId = itemId;
+  editingItemType = itemType;
+  const items = itemType==='shop' ? SHOP_ITEMS : MENU_ITEMS;
+  const item = items.find(x=>x.id===itemId);
+  if(!item) return;
+
+  initOptionEditor(item.optionGroups||[]);
+  if(item.imageBase64) editingImageBase64 = item.imageBase64;
+
+  const body = document.getElementById('edit-item-body');
+  document.getElementById('edit-item-title').textContent = `編輯：${item.name}`;
+  body.innerHTML = `
+    <input class="mgmt-input" id="edit-name" value="${item.name}" placeholder="名稱">
+    <input class="mgmt-input" id="edit-desc" value="${item.desc||''}" placeholder="描述">
+    <div class="mgmt-row" style="margin-bottom:10px">
+      <input class="mgmt-input" id="edit-price" type="number" value="${item.price}" placeholder="價格">
+      <input class="mgmt-input" id="edit-cat" value="${item.category||''}" placeholder="分類">
+    </div>
+    <label class="img-upload-label" for="edit-img">📷 ${item.imageBase64?'更換圖片':'上傳圖片'}</label>
+    <input type="file" id="edit-img" accept="image/*" style="display:none" onchange="handleImageUpload(this)">
+    ${item.imageBase64?`<img id="img-preview" class="img-preview" src="${item.imageBase64}" style="display:block">`
+      :'<img id="img-preview" class="img-preview" style="display:none" src="">'}
+    <div style="margin-top:12px"><div style="font-size:13px;font-weight:700;margin-bottom:8px">客製選項</div>
+      <div id="option-editor-wrap"></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="mgmt-add-btn" style="flex:1;background:var(--sage)" onclick="saveEditItem()">儲存修改</button>
+      <button class="mgmt-add-btn" style="flex:1;background:#f0ebe4;color:var(--dark)" onclick="closeEditItem()">取消</button>
+    </div>
+  `;
+  renderOptionEditor();
+  document.getElementById('edit-item-overlay').classList.add('open');
+}
+
+function closeEditItem(){
+  document.getElementById('edit-item-overlay').classList.remove('open');
+  editingItemId = null; editingItemType = null;
+  editingImageBase64 = null; editingOptionGroups = [];
+}
+
+async function saveEditItem(){
+  const name = document.getElementById('edit-name').value.trim();
+  const price = parseInt(document.getElementById('edit-price').value);
+  const cat = document.getElementById('edit-cat').value.trim();
+  const desc = document.getElementById('edit-desc').value.trim();
+  if(!name||!price){ showToast('請填寫名稱和價格'); return; }
+  const items = editingItemType==='shop' ? SHOP_ITEMS : MENU_ITEMS;
+  const item = items.find(x=>x.id===editingItemId);
+  if(!item) return;
+  const updated = {...item, name, price, category:cat, desc,
+    optionGroups: editingOptionGroups.map(g=>({...g,options:[...g.options]}))};
+  if(editingImageBase64) updated.imageBase64 = editingImageBase64;
+  await saveMenuItem(updated);
+  showToast('✅ 已儲存');
+  closeEditItem();
+  if(editingItemType==='shop') await renderAdminShopMgmt();
+  else await renderAdminMenuMgmt();
+}
+
+// ════════════════════════════════════════
+//  客製選項組標題可編輯
+// ════════════════════════════════════════
+function addOptionGroup(){
+  editingOptionGroups.push({ name:'點擊編輯標題', options:[{label:'選項1',price:0}], required:false });
+  renderOptionEditor();
+}
+
+// ════════════════════════════════════════
+//  POS 現場代點：支援客製選項
+// ════════════════════════════════════════
+let posSelections = {}; // { itemId: { groupName: {label,price} } }
+let posQty = {};        // { itemId: qty }
+let posExpanded = null; // 展開中的品項 id
+
+function posToggleExpand(itemId){
+  posExpanded = posExpanded===itemId ? null : itemId;
+  renderAdminPOS();
+}
+
+function posSelectOption(itemId, gi, oi, groupName, label, price){
+  if(!posSelections[itemId]) posSelections[itemId]={};
+  posSelections[itemId][groupName]={label,price};
+  renderAdminPOS();
+}
+
+function posSetQty(itemId, delta){
+  posQty[itemId] = Math.max(1, (posQty[itemId]||1) + delta);
+  renderAdminPOS();
+}
+
+function posClearAll(){
+  posCart={}; posSelections={}; posQty={}; posExpanded=null;
+  renderAdminPOS();
+}
+
+function posAddItemWithOptions(itemId){
+  const items = MENU_ITEMS.filter(m=>!m.deleted&&m.available!==false);
+  const item = items.find(x=>x.id===itemId);
+  if(!item) return;
+  const groups = item.optionGroups||[];
+  const sels = posSelections[itemId]||{};
+  for(const g of groups){
+    if(g.required && !sels[g.name]){ showToast(`請選擇${g.name}`); return; }
+  }
+  const addons = Object.values(sels).reduce((s,o)=>s+(o.price||0),0);
+  const unitPrice = item.price + addons;
+  const selKey = Object.entries(sels).map(([k,v])=>`${k}:${v.label}`).join('|');
+  const cartKey = item.id + (selKey?'::'+selKey:'');
+  const qty = posQty[itemId]||1;
+  if(!posCart[cartKey]){
+    posCart[cartKey]={id:item.id,name:item.name,unitPrice,qty:0,selections:{...sels},selKey};
+  }
+  posCart[cartKey].qty += qty;
+  posSelections[itemId]={}; posQty[itemId]=1; posExpanded=null;
+  renderAdminPOS();
+}
 
 // ════════════════════════════════════════
 //  非會員模式
@@ -1812,7 +2303,7 @@ function renderOptionEditor(){
   el.innerHTML = editingOptionGroups.map((g,gi) => `
     <div class="option-editor">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div style="font-size:13px;font-weight:700">${g.name}</div>
+        <input value="${g.name}" style="font-size:13px;font-weight:700;border:none;background:transparent;outline:none;flex:1;font-family:'Noto Sans TC',sans-serif;cursor:text" onchange="editingOptionGroups[${gi}].name=this.value" placeholder="選項組名稱（如：溫度）">
         <div style="display:flex;gap:6px;align-items:center">
           <label style="font-size:12px;display:flex;align-items:center;gap:4px;cursor:pointer">
             <input type="checkbox" ${g.required?'checked':''} onchange="toggleRequired(${gi},this.checked)"> 必選
