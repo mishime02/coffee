@@ -408,6 +408,17 @@ input[type=range]{width:100%;accent-color:var(--caramel);cursor:pointer;}
 .pos-item-expand{background:#f5f0e8;border-radius:12px;padding:12px;margin-bottom:8px;}
 .pos-item-expand-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;cursor:pointer;}
 .pos-qty-row{display:flex;align-items:center;gap:10px;margin-top:10px;}
+
+/* 管理端訂單編輯 overlay */
+.admin-order-edit-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:350;display:none;align-items:flex-end;justify-content:center;}
+.admin-order-edit-overlay.open{display:flex;}
+.admin-order-edit-panel{background:#fff;border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:520px;max-height:88vh;overflow-y:auto;}
+.admin-order-item-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f0ebe4;}
+.admin-order-item-name{flex:1;font-size:14px;font-weight:600;}
+.admin-order-item-sel{font-size:12px;color:var(--mist);margin-top:2px;}
+.reprint-btn{padding:8px 16px;background:#E8F0FE;color:#1a73e8;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;width:100%;margin-top:8px;}
+.reprint-btn:hover{background:#d0e4fd;}
+.edit-order-btn{padding:6px 12px;background:#FFF3E0;color:var(--caramel);border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;}
 </style>
 </head>
 <body>
@@ -501,6 +512,22 @@ input[type=range]{width:100%;accent-color:var(--caramel);cursor:pointer;}
         你的外帶中杯飲品兌換券已成功核銷<br>請向店員取餐，享用你的咖啡 ☕
       </div>
       <button class="panel-btn" onclick="closeSuccessAndRefresh()">回到集點卡</button>
+    </div>
+  </div>
+
+  <!-- 管理端訂單編輯 overlay -->
+  <div class="admin-order-edit-overlay" id="admin-order-edit-overlay" onclick="if(event.target===this)closeAdminOrderEdit()">
+    <div class="admin-order-edit-panel">
+      <div class="panel-handle"></div>
+      <div class="panel-title" id="admin-order-edit-title">編輯訂單</div>
+      <div id="admin-order-edit-body"></div>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button class="reprint-btn" onclick="reprintOrder()">🖨 重新出單</button>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button class="mgmt-add-btn" style="flex:1;background:var(--sage)" onclick="saveAdminOrderEdit()">儲存修改</button>
+        <button class="mgmt-add-btn" style="flex:1;background:#f0ebe4;color:var(--dark)" onclick="closeAdminOrderEdit()">取消</button>
+      </div>
     </div>
   </div>
 
@@ -1389,16 +1416,45 @@ async function submitOrder(){
 //  管理端：點餐管理
 // ════════════════════════════════════════
 async function renderAdminOrders(){
-  const orders=await loadOrders();
-  const pending=orders.filter(o=>o.status==='pending');
-  const done=orders.filter(o=>o.status==='done');
+  const orders = await loadOrders();
+  _lastOrders = orders; // 快取
+  const pending = orders.filter(o=>o.status==='pending');
+  const done = orders.filter(o=>o.status==='done');
 
-  document.getElementById('a-orders').innerHTML=`
-    ${pending.length?`<div class="new-order-banner">🔔 目前有 ${pending.length} 筆待處理訂單</div>`:''}
-    <div class="a-card-title" style="font-size:15px;font-weight:700;margin-bottom:12px">⏳ 待處理（${pending.length}）</div>
-    ${!pending.length?`<div class="no-orders">目前沒有待處理訂單 ☕</div>`:''}
-    <div class="order-tickets">${pending.map(o=>`
-      <div class="ticket" id="ticket-${o.id}">
+  const el = document.getElementById('a-orders');
+  el.innerHTML = '';
+
+  // 待處理
+  if(pending.length){
+    const banner = document.createElement('div');
+    banner.className='new-order-banner';
+    banner.textContent=`🔔 目前有 ${pending.length} 筆待處理訂單`;
+    el.appendChild(banner);
+  }
+
+  const pendingTitle = document.createElement('div');
+  pendingTitle.className='a-card-title';
+  pendingTitle.style.cssText='font-size:15px;font-weight:700;margin-bottom:12px';
+  pendingTitle.textContent=`⏳ 待處理（${pending.length}）`;
+  el.appendChild(pendingTitle);
+
+  if(!pending.length){
+    const empty=document.createElement('div');
+    empty.className='no-orders';
+    empty.textContent='目前沒有待處理訂單 ☕';
+    el.appendChild(empty);
+  } else {
+    const grid=document.createElement('div');
+    grid.className='order-tickets';
+    pending.forEach(o=>{
+      const div=document.createElement('div');
+      div.className='ticket';
+      div.id=`ticket-${o.id}`;
+      const selStr = items => items.map(i=>{
+        const sel=i.selections?Object.values(i.selections).map(v=>v.label).join('/'):'' ;
+        return `${i.name}${sel?' ('+sel+')':''} x${i.qty}`;
+      }).join('<br>');
+      div.innerHTML=`
         <div class="ticket-header">
           <div class="ticket-num">#${o.num}</div>
           <div>
@@ -1406,24 +1462,50 @@ async function renderAdminOrders(){
             <div class="ticket-time">${o.createdAt}</div>
           </div>
         </div>
-        <div class="ticket-items">${o.items.map(i=>`${i.name} x${i.qty}`).join('<br>')}</div>
+        <div class="ticket-items">${selStr(o.items)}</div>
         ${o.note?`<div class="ticket-note">備註：${o.note}</div>`:''}
-        <div style="font-weight:700;color:var(--caramel);margin-bottom:10px">NT\$${o.total}</div>
-        <button class="ticket-done-btn" onclick="markOrderDone('${o.id}')">✓ 標記完成</button>
-      </div>`).join('')}
-    </div>
-    <div class="a-card-title" style="font-size:15px;font-weight:700;margin:20px 0 12px">✅ 已完成（${done.length} 筆）</div>
-    <div class="order-tickets">${done.map(o=>`
-      <div class="ticket done">
+        <div style="font-weight:700;color:var(--caramel);margin-bottom:8px">NT$${o.total}</div>
+        <div style="display:flex;gap:6px">
+          <button class="ticket-done-btn" style="flex:2" onclick="markOrderDone('${o.id}')">✓ 標記完成</button>
+          <button class="edit-order-btn" onclick="openAdminOrderEdit('${o.id}')">編輯</button>
+        </div>
+        <button class="reprint-btn" onclick="_lastOrders&&openAdminOrderEdit('${o.id}');setTimeout(()=>reprintOrder(),100)">🖨 出單</button>
+      `;
+      grid.appendChild(div);
+    });
+    el.appendChild(grid);
+  }
+
+  // 已完成
+  const doneTitle=document.createElement('div');
+  doneTitle.className='a-card-title';
+  doneTitle.style.cssText='font-size:15px;font-weight:700;margin:20px 0 12px';
+  doneTitle.textContent=`✅ 已完成（${done.length} 筆）`;
+  el.appendChild(doneTitle);
+
+  if(done.length){
+    const doneGrid=document.createElement('div');
+    doneGrid.className='order-tickets';
+    done.forEach(o=>{
+      const div=document.createElement('div');
+      div.className='ticket done';
+      div.innerHTML=`
         <div class="ticket-header">
           <div class="ticket-num" style="color:var(--mist)">#${o.num}</div>
           <span class="ticket-type${o.type==='shop'?' shop':''}">${o.type==='order'?'點餐':'商店'}</span>
         </div>
-        <div class="ticket-items" style="color:var(--mist)">${o.items.map(i=>`${i.name} x${i.qty}`).join('、')}</div>
-      </div>`).join('')}
-    </div>`;
+        <div class="ticket-items" style="color:var(--mist)">${o.items.map(i=>i.name+' x'+i.qty).join('、')}</div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button class="edit-order-btn" onclick="openAdminOrderEdit('${o.id}')">編輯</button>
+          <button class="reprint-btn" style="margin:0;flex:1" onclick="openAdminOrderEdit('${o.id}');setTimeout(()=>reprintOrder(),100)">🖨 重新出單</button>
+        </div>
+      `;
+      doneGrid.appendChild(div);
+    });
+    el.appendChild(doneGrid);
+  }
 
-  // 啟動自動刷新（每10秒）
+  // 自動刷新
   if(orderAutoRefresh) clearInterval(orderAutoRefresh);
   orderAutoRefresh=setInterval(()=>{
     const activeView=document.querySelector('#mode-admin .view.show')?.id;
@@ -1566,15 +1648,33 @@ function posAddItem(id){ posCart[id]=(posCart[id]||0)+1; renderAdminPOS(); }
 function posRemoveItem(id){ posCart[id]=(posCart[id]||0)-1; if(posCart[id]<=0)delete posCart[id]; renderAdminPOS(); }
 function posClear(){ posCart={}; renderAdminPOS(); }
 async function posSubmit(){
-  const items=MENU_ITEMS.filter(m=>!m.deleted);
+  const allItems=MENU_ITEMS.filter(m=>!m.deleted);
   const note=document.getElementById('pos-note')?.value||'';
-  const orderItems=Object.entries(posCart).map(([id,qty])=>{
-    const it=items.find(x=>x.id===id); return{id,name:it.name,price:it.price,qty};});
+  const orderItems=Object.entries(posCart).map(([key,entry])=>{
+    if(typeof entry==='object'&&entry.qty!==undefined){
+      return{id:entry.id,name:entry.name,price:entry.unitPrice,qty:entry.qty,selections:entry.selections||{}};
+    }
+    const it=allItems.find(x=>x.id===key);
+    return{id:key,name:it?.name||key,price:it?.price||0,qty:entry,selections:{}};
+  });
   const total=orderItems.reduce((s,x)=>s+x.price*x.qty,0);
   const num=await getNextOrderNum();
-  await submitOrderToDB({num,type:'order',items:orderItems,total,note,memberName:'現場代點',memberId:''});
-  showToast(`✅ 訂單 #${num} 已送出`);
-  posCart={};
+  const orderId='ORD-'+Date.now();
+  const orderData={id:orderId,num,type:'order',items:orderItems,total,note,
+    memberName:'現場代點',memberId:'',createdAt:nowStr(),status:'pending'};
+  await window._setDoc(window._doc(db,'orders',orderId),orderData);
+  if(_lastOrders) _lastOrders.unshift(orderData);
+  // 出單提示
+  let printContent=`=== 出單 ===\n#${num} 現場代點\n`;
+  orderItems.forEach(it=>{
+    const sel=it.selections?Object.values(it.selections).map(v=>v.label).join('/'):'' ;
+    printContent+=`${it.name}${sel?' ('+sel+')':''} x${it.qty}\n`;
+  });
+  printContent+=`合計：NT$${total}`;
+  if(note) printContent+=`\n備註：${note}`;
+  alert(printContent);
+  showToast(`✅ 訂單 #${num} 已送出並出單`);
+  posCart={}; posSelections={}; posQty={}; posExpanded=null;
   renderAdminPOS();
 }
 
@@ -1763,6 +1863,111 @@ async function deleteShopItem(id){
 }
 
 
+
+
+// ════════════════════════════════════════
+//  管理端訂單編輯 & 重新出單
+// ════════════════════════════════════════
+let editingOrderData = null;
+
+function openAdminOrderEdit(orderId){
+  // 從已載入的訂單中找
+  _lastOrders = _lastOrders || [];
+  const order = _lastOrders.find(o=>o.id===orderId);
+  if(!order){ showToast('找不到訂單'); return; }
+  editingOrderData = JSON.parse(JSON.stringify(order)); // deep copy
+
+  const title = document.getElementById('admin-order-edit-title');
+  title.textContent = `編輯訂單 #${order.num}`;
+
+  renderAdminOrderEditBody();
+  document.getElementById('admin-order-edit-overlay').classList.add('open');
+}
+
+function renderAdminOrderEditBody(){
+  const body = document.getElementById('admin-order-edit-body');
+  if(!editingOrderData){ body.innerHTML=''; return; }
+  const o = editingOrderData;
+  let html = '';
+
+  html += `<div style="font-size:12px;color:var(--mist);margin-bottom:12px">${o.createdAt} · ${o.type==='order'?'點餐':'商店'}</div>`;
+
+  o.items.forEach((item,ii) => {
+    const selLabel = item.selections ? Object.values(item.selections).map(v=>v.label).join('、') : '';
+    html += `<div class="admin-order-item-row">
+      <div style="flex:1">
+        <div class="admin-order-item-name">${item.name}</div>
+        ${selLabel?`<div class="admin-order-item-sel">${selLabel}</div>`:''}
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="cart-qty-btn" onclick="adminOrderQty(${ii},-1)">−</button>
+        <span style="font-weight:700;min-width:20px;text-align:center">${item.qty}</span>
+        <button class="cart-qty-btn" onclick="adminOrderQty(${ii},1)">+</button>
+        <div style="color:var(--caramel);font-weight:700;min-width:52px;text-align:right">NT$${item.price*item.qty}</div>
+        <button class="mgmt-del-btn" onclick="adminOrderDelItem(${ii})">✕</button>
+      </div>
+    </div>`;
+  });
+
+  const total = o.items.reduce((s,x)=>s+x.price*x.qty,0);
+  html += `<div style="display:flex;justify-content:space-between;font-size:16px;font-weight:700;padding:14px 0 4px;border-top:1.5px solid #f0ebe4;margin-top:4px">
+    <span>合計</span><span style="color:var(--caramel)">NT$${total}</span>
+  </div>`;
+  if(o.note) html += `<div style="font-size:12px;color:var(--mist);margin-top:4px">備註：${o.note}</div>`;
+
+  body.innerHTML = html;
+}
+
+function adminOrderQty(idx, delta){
+  if(!editingOrderData) return;
+  editingOrderData.items[idx].qty = Math.max(1, editingOrderData.items[idx].qty + delta);
+  renderAdminOrderEditBody();
+}
+
+function adminOrderDelItem(idx){
+  if(!editingOrderData) return;
+  editingOrderData.items.splice(idx,1);
+  if(!editingOrderData.items.length){ showToast('至少保留一項'); editingOrderData.items=[{name:'(已刪除)',price:0,qty:1}]; }
+  renderAdminOrderEditBody();
+}
+
+async function saveAdminOrderEdit(){
+  if(!editingOrderData) return;
+  const total = editingOrderData.items.reduce((s,x)=>s+x.price*x.qty,0);
+  editingOrderData.total = total;
+  await window._setDoc(window._doc(db,'orders',editingOrderData.id), editingOrderData);
+  // 更新 _lastOrders 快取
+  if(_lastOrders){
+    const i = _lastOrders.findIndex(o=>o.id===editingOrderData.id);
+    if(i>=0) _lastOrders[i] = editingOrderData;
+  }
+  showToast('✅ 訂單已更新');
+  closeAdminOrderEdit();
+  renderAdminOrders();
+}
+
+function reprintOrder(){
+  if(!editingOrderData) return;
+  const o = editingOrderData;
+  // 目前先用 alert 顯示出單內容（待串接印表機）
+  let content = `=== 重新出單 ===\n#${o.num} ${o.type==='order'?'點餐':'商店'}\n`;
+  o.items.forEach(it => {
+    const sel = it.selections ? Object.values(it.selections).map(v=>v.label).join('/') : '';
+    content += `${it.name}${sel?' ('+sel+')':''} x${it.qty}\n`;
+  });
+  content += `合計：NT$${o.total}`;
+  if(o.note) content += `\n備註：${o.note}`;
+  alert(content);
+  showToast('🖨 已送出重新出單');
+}
+
+function closeAdminOrderEdit(){
+  document.getElementById('admin-order-edit-overlay').classList.remove('open');
+  editingOrderData = null;
+}
+
+// 快取最後載入的訂單
+let _lastOrders = [];
 
 // ════════════════════════════════════════
 //  客戶端購物車側邊欄
