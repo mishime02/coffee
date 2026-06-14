@@ -445,9 +445,9 @@ input[type=range]{width:100%;accent-color:var(--caramel);cursor:pointer;}
 .cart-bottom-btn{padding:12px 20px;background:var(--dark);color:#fff;border:none;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;white-space:nowrap;}
 
 /* 客戶端雙欄點餐版面 */
-.order-layout{display:grid;grid-template-columns:1fr 260px;gap:0;min-height:calc(100vh - 56px);}
-.order-menu-col{padding:16px 16px 40px;overflow-y:auto;}
-.order-cart-col{background:#fff;border-left:1px solid #f0ebe4;padding:14px;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;display:flex;flex-direction:column;min-width:220px;max-width:260px;}
+.order-layout{display:block;max-width:480px;margin:0 auto;}
+.order-menu-col{padding:16px 16px 100px;}
+.order-cart-col{display:none !important;}
 .order-cart-col-title{font-size:15px;font-weight:700;margin-bottom:12px;color:var(--dark);}
 .order-cart-empty{flex:1;display:flex;align-items:center;justify-content:center;color:var(--mist);font-size:13px;text-align:center;padding:20px 0;}
 .order-cart-entries{flex:1;overflow-y:auto;}
@@ -1375,13 +1375,7 @@ async function renderOrderMenu(){
   }
   menuCol.appendChild(list);
 
-  // ── 右：購物車欄 ──
-  const cartCol=document.createElement('div');
-  cartCol.className='order-cart-col';
-  renderInlineCart(cartCol, 'order');
-
   layout.appendChild(menuCol);
-  layout.appendChild(cartCol);
   el.appendChild(layout);
 
   // 手機版底部欄
@@ -1451,12 +1445,7 @@ async function renderShopMenu(){
   }
   menuCol.appendChild(list);
 
-  const cartCol=document.createElement('div');
-  cartCol.className='order-cart-col';
-  renderInlineCart(cartCol,'shop');
-
   layout.appendChild(menuCol);
-  layout.appendChild(cartCol);
   el.appendChild(layout);
   updateCartBottomBar();
 }
