@@ -123,10 +123,10 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--foam);color:var(--da
 .stamp.filled{background:rgba(255,255,255,.28);border-color:rgba(255,255,255,.5);}
 .stamp.filled img{width:88%;height:88%;object-fit:contain;filter:brightness(1.1) drop-shadow(0 1px 4px rgba(0,0,0,.2));}
 .stamp.empty{background:rgba(255,255,255,.05);}
-.stamp-card-footer{display:flex;justify-content:space-between;align-items:center;}
-.stamp-card-name{font-size:15px;font-weight:700;opacity:.9;}
-.stamp-card-sub{font-size:11px;opacity:.45;margin-top:2px;}
-.stamp-progress{font-size:12px;opacity:.55;}
+.stamp-card-footer{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;}
+.stamp-card-name{font-size:15px;font-weight:700;opacity:.9;min-width:0;}
+.stamp-card-sub{font-size:11px;opacity:.45;margin-top:2px;white-space:nowrap;}
+.stamp-progress{font-size:10px;opacity:.55;white-space:nowrap;flex-shrink:0;text-align:right;}
 
 /* ── 兌換券 ── */
 .coupon-section-title{font-size:15px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
@@ -234,6 +234,97 @@ input[type=range]{width:100%;accent-color:var(--caramel);cursor:pointer;}
   .qr-info{width:100%;}
   .topbar-brand{font-size:14px;}
 }
+
+/* ══ 點餐 & 商店 共用 ══ */
+.menu-section{max-width:480px;margin:0 auto;padding:16px 16px 80px;}
+.menu-cat-bar{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:16px;}
+.menu-cat-btn{padding:6px 16px;border-radius:20px;border:1.5px solid var(--caramel);background:#fff;color:var(--caramel);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Noto Sans TC',sans-serif;transition:all .2s;flex-shrink:0;}
+.menu-cat-btn.active{background:var(--caramel);color:#fff;}
+.menu-item-list{display:flex;flex-direction:column;gap:10px;margin-bottom:16px;}
+.menu-item-card{background:#fff;border-radius:14px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.06);cursor:pointer;transition:all .2s;}
+.menu-item-card:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.1);}
+.menu-item-card.unavail{opacity:.45;cursor:not-allowed;}
+.menu-item-left{flex:1;}
+.menu-item-name{font-size:15px;font-weight:700;margin-bottom:3px;}
+.menu-item-desc{font-size:12px;color:var(--mist);margin-bottom:6px;}
+.menu-item-price{font-size:15px;font-weight:700;color:var(--caramel);}
+.menu-item-right{display:flex;align-items:center;gap:6px;margin-left:12px;}
+.item-qty-btn{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--caramel);background:#fff;color:var(--caramel);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;}
+.item-qty-num{font-weight:700;min-width:20px;text-align:center;font-size:15px;}
+.item-img{width:64px;height:64px;border-radius:10px;object-fit:cover;margin-right:12px;flex-shrink:0;}
+
+/* 購物車浮動按鈕 */
+.order-float{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--dark);color:#fff;border:none;border-radius:30px;padding:14px 28px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:12px;box-shadow:0 8px 24px rgba(0,0,0,.25);font-family:'Noto Sans TC',sans-serif;z-index:50;min-width:220px;justify-content:center;transition:transform .2s;}
+.order-float:hover{transform:translateX(-50%) translateY(-2px);}
+.order-float-badge{background:var(--caramel);border-radius:12px;padding:2px 10px;font-size:13px;}
+
+/* 訂單面板 */
+.order-panel-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0f0f0;}
+.order-panel-name{font-weight:600;font-size:14px;}
+.order-panel-price{color:var(--caramel);font-weight:700;font-size:14px;}
+.order-note-input{width:100%;padding:10px 14px;border:1.5px solid #e8e0d5;border-radius:10px;font-size:14px;font-family:'Noto Sans TC',sans-serif;outline:none;resize:none;margin-bottom:12px;}
+.order-note-input:focus{border-color:var(--caramel);}
+.order-submit-btn{width:100%;padding:15px;background:var(--dark);color:#fff;border:none;border-radius:16px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;}
+.order-submit-btn:hover{opacity:.85;}
+
+/* 訂單成功 */
+.order-success{text-align:center;padding:20px 0;}
+.order-success-num{font-size:64px;font-weight:900;color:var(--caramel);line-height:1;margin:12px 0;}
+.order-success-label{font-size:13px;color:var(--mist);margin-bottom:4px;}
+.order-success-hint{font-size:13px;color:var(--mist);line-height:1.7;margin-top:12px;}
+
+/* ══ 管理端：點餐管理 ══ */
+.order-tickets{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;}
+.ticket{background:#fff;border-radius:16px;padding:16px;box-shadow:0 2px 12px rgba(0,0,0,.07);border-left:4px solid var(--caramel);}
+.ticket.done{border-left-color:#ccc;opacity:.6;}
+.ticket-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.ticket-num{font-size:22px;font-weight:900;color:var(--caramel);}
+.ticket-time{font-size:11px;color:var(--mist);}
+.ticket-type{font-size:11px;font-weight:700;padding:2px 8px;border-radius:8px;background:#FFF3E0;color:var(--caramel);}
+.ticket-type.shop{background:#E8F5E9;color:var(--sage);}
+.ticket-items{font-size:13px;color:#444;line-height:1.8;margin-bottom:12px;}
+.ticket-note{font-size:12px;color:var(--mist);font-style:italic;margin-bottom:10px;}
+.ticket-done-btn{width:100%;padding:10px;background:var(--sage);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;}
+.ticket-done-btn:hover{opacity:.85;}
+.ticket-print-btn{width:100%;padding:10px;background:var(--dark);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;margin-bottom:8px;}
+.no-orders{text-align:center;padding:48px 0;color:var(--mist);font-size:14px;}
+
+/* ══ 管理端：菜單管理 ══ */
+.mgmt-form{background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,.06);margin-bottom:20px;}
+.mgmt-input{width:100%;padding:10px 14px;border:1.5px solid #e8e0d5;border-radius:10px;font-size:14px;font-family:'Noto Sans TC',sans-serif;outline:none;margin-bottom:10px;color:var(--dark);}
+.mgmt-input:focus{border-color:var(--caramel);}
+.mgmt-row{display:flex;gap:10px;}
+.mgmt-row .mgmt-input{margin-bottom:0;}
+.mgmt-add-btn{padding:10px 20px;background:var(--dark);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;white-space:nowrap;}
+.mgmt-item-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#faf8f5;border-radius:10px;margin-bottom:8px;}
+.mgmt-item-name{font-weight:600;font-size:14px;}
+.mgmt-item-price{color:var(--caramel);font-weight:700;font-size:13px;}
+.mgmt-item-cat{font-size:11px;color:var(--mist);margin-top:2px;}
+.mgmt-del-btn{padding:5px 12px;background:#FEE2E0;color:var(--blush);border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;}
+.avail-toggle{padding:5px 12px;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;margin-right:6px;}
+.avail-toggle.on{background:#E8F5E9;color:var(--sage);}
+.avail-toggle.off{background:#FEE2E0;color:var(--blush);}
+
+/* ══ 管理端：現場代點 ══ */
+.pos-wrap{display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start;}
+.pos-menu{background:#fff;border-radius:16px;padding:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);}
+.pos-cart{background:#fff;border-radius:16px;padding:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);position:sticky;top:76px;}
+.pos-cart-title{font-size:15px;font-weight:700;margin-bottom:12px;}
+.pos-cart-empty{text-align:center;padding:20px 0;color:var(--mist);font-size:13px;}
+.pos-cart-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f5f0e8;}
+.pos-total{display:flex;justify-content:space-between;font-size:16px;font-weight:700;padding:12px 0 8px;}
+.pos-submit{width:100%;padding:13px;background:var(--dark);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;margin-top:4px;}
+.pos-clear{width:100%;padding:10px;background:#f0ebe4;color:var(--dark);border:none;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Noto Sans TC',sans-serif;margin-top:6px;}
+.pos-item-card{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#faf8f5;border-radius:10px;margin-bottom:8px;cursor:pointer;transition:all .2s;}
+.pos-item-card:hover{background:#f0ebe4;}
+.new-order-banner{background:var(--sage);color:#fff;padding:10px 16px;border-radius:12px;font-size:13px;font-weight:700;text-align:center;margin-bottom:14px;animation:pulse 1s ease infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.7;}}
+
+@media(max-width:700px){
+  .pos-wrap{grid-template-columns:1fr;}
+  .pos-cart{position:static;}
+}
+
 </style>
 </head>
 <body>
@@ -287,9 +378,13 @@ input[type=range]{width:100%;accent-color:var(--caramel);cursor:pointer;}
       </div>
       <div class="nav-pills">
         <button class="pill active" onclick="clientNav('c-stamp',this)">☕ 集點卡</button>
-        <button class="pill" onclick="clientNav('c-history',this)">📋 集點紀錄</button>
+        <button class="pill" onclick="clientNav('c-order',this)">🍽 點餐</button>
+        <button class="pill" onclick="clientNav('c-shop',this)">🛍 商店</button>
+        <button class="pill" onclick="clientNav('c-history',this)">📋 紀錄</button>
       </div>
       <div id="c-stamp" class="view show"></div>
+      <div id="c-order" class="view"></div>
+      <div id="c-shop" class="view"></div>
       <div id="c-history" class="view"></div>
     </div>
   </div>
@@ -324,6 +419,19 @@ input[type=range]{width:100%;accent-color:var(--caramel);cursor:pointer;}
     </div>
   </div>
 
+  <!-- 點餐購物車 overlay -->
+  <div class="overlay" id="order-cart-overlay" onclick="if(event.target===this)closeOrderCart()">
+    <div class="panel">
+      <div class="panel-handle"></div>
+      <div class="panel-title" id="order-cart-title">確認訂單</div>
+      <div id="order-cart-items"></div>
+      <div class="order-total" id="order-cart-total-row" style="display:none"><span>合計</span><span id="order-cart-total"></span></div>
+      <textarea class="order-note-input" id="order-note" placeholder="備註（可不填）" rows="2"></textarea>
+      <button class="order-submit-btn" id="order-submit-btn" onclick="submitOrder()">送出訂單</button>
+      <button class="panel-btn close-btn" style="margin-top:10px" onclick="closeOrderCart()">繼續點餐</button>
+    </div>
+  </div>
+
   <!-- ADMIN -->
   <div id="mode-admin" style="display:none">
     <div class="admin-wrap">
@@ -332,12 +440,20 @@ input[type=range]{width:100%;accent-color:var(--caramel);cursor:pointer;}
         <div class="admin-head-date" id="admin-date"></div>
       </div>
       <div class="nav-pills">
-        <button class="pill active" onclick="adminNav('a-qr',this)">🔳 集點 QR Code</button>
-        <button class="pill" onclick="adminNav('a-scan',this)">📷 核銷掃描</button>
+        <button class="pill active" onclick="adminNav('a-orders',this)">🧾 點餐管理</button>
+        <button class="pill" onclick="adminNav('a-pos',this)">👨‍💼 現場代點</button>
+        <button class="pill" onclick="adminNav('a-menu-mgmt',this)">📋 菜單管理</button>
+        <button class="pill" onclick="adminNav('a-shop-mgmt',this)">🛍 商店管理</button>
+        <button class="pill" onclick="adminNav('a-qr',this)">🔳 集點 QR</button>
+        <button class="pill" onclick="adminNav('a-scan',this)">📷 核銷</button>
         <button class="pill" onclick="adminNav('a-members',this)">👥 會員</button>
-        <button class="pill" onclick="adminNav('a-log',this)">📋 紀錄</button>
+        <button class="pill" onclick="adminNav('a-log',this)">📋 集點紀錄</button>
       </div>
-      <div id="a-qr" class="view show"></div>
+      <div id="a-orders" class="view show"></div>
+      <div id="a-pos" class="view"></div>
+      <div id="a-menu-mgmt" class="view"></div>
+      <div id="a-shop-mgmt" class="view"></div>
+      <div id="a-qr" class="view"></div>
       <div id="a-scan" class="view"></div>
       <div id="a-members" class="view"></div>
       <div id="a-log" class="view"></div>
@@ -561,7 +677,7 @@ function switchMode(mode){
   else if(mode==='admin'){
     document.getElementById('mode-admin').style.display='block';
     document.getElementById('admin-date').textContent=new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'long',day:'numeric'});
-    loadMembers().then(()=>renderAdminView('a-qr'));
+    loadMembers().then(()=>renderAdminView('a-orders'));
   } else {
     document.getElementById('mode-client').style.display='block';
     renderClientView(document.querySelector('#mode-client .view.show')?.id||'c-stamp');
@@ -572,10 +688,14 @@ function clientNav(id,btn){
   document.querySelectorAll('#mode-client .view').forEach(v=>v.classList.remove('show'));
   document.getElementById(id).classList.add('show');
   btn.closest('.nav-pills').querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
-  btn.classList.add('active'); renderClientView(id);
+  btn.classList.add('active');
+  if(id==='c-order') renderOrderMenu();
+  else if(id==='c-shop') renderShopMenu();
+  else renderClientView(id);
 }
 function adminNav(id,btn){
   if(html5QrScanner){ try{ html5QrScanner.stop().catch(()=>{}); }catch(e){} html5QrScanner=null; scannerRunning=false; }
+  if(orderAutoRefresh&&id!=='a-orders'){ clearInterval(orderAutoRefresh); orderAutoRefresh=null; }
   document.querySelectorAll('#mode-admin .view').forEach(v=>v.classList.remove('show'));
   document.getElementById(id).classList.add('show');
   btn.closest('.nav-pills').querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
@@ -648,11 +768,13 @@ function renderStampCard(){
     </div>
     <div style="background:#fff;border-radius:14px;padding:14px 16px;box-shadow:0 2px 8px rgba(0,0,0,.05);text-align:center;margin-bottom:20px;">
       <div style="font-size:13px;font-weight:700;margin-bottom:8px">如何集點？</div>
-      <div style="font-size:13px;color:#666;line-height:1.9;">
-        ・內用/外帶飲品一杯可累積 1 點。<br>
-        ・集滿 12 點可兌換外帶中杯飲品一杯。<br>
-        ・升級大杯或改內用需補差額。<br>
-        ・部分商品或服務不適用優惠券內容。
+      <div style="font-size:12px;color:#888;line-height:1.9;text-align:left;">
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:0 4px;">
+          <span>・</span><span>內用/外帶飲品一杯可累積 1 點。</span>
+          <span>・</span><span>集滿 12 點可兌換外帶中杯飲品一杯。</span>
+          <span>・</span><span>升級大杯或改內用需補差額。</span>
+          <span>・</span><span>部分商品或服務不適用優惠券內容。</span>
+        </div>
       </div>
     </div>
     <div class="coupon-section-title">
@@ -704,10 +826,14 @@ function closeSuccessAndRefresh(){
 
 // ── Admin views ────────────────────────────────────
 function renderAdminView(id){
-  if(id==='a-qr')      renderAdminQR();
-  if(id==='a-scan')    renderAdminScanner();
-  if(id==='a-members') renderAdminMembers();
-  if(id==='a-log')     renderAdminLog();
+  if(id==='a-orders')    renderAdminOrders();
+  if(id==='a-pos')       renderAdminPOS();
+  if(id==='a-menu-mgmt') renderAdminMenuMgmt();
+  if(id==='a-shop-mgmt') renderAdminShopMgmt();
+  if(id==='a-qr')        renderAdminQR();
+  if(id==='a-scan')      renderAdminScanner();
+  if(id==='a-members')   renderAdminMembers();
+  if(id==='a-log')       renderAdminLog();
 }
 
 async function renderAdminQR(){
@@ -897,6 +1023,453 @@ function renderAdminLog(){
         </tbody>
       </table>`}
     </div>`;
+}
+
+
+// ════════════════════════════════════════
+//  點餐 & 商店 狀態
+// ════════════════════════════════════════
+let MENU_ITEMS=[], SHOP_ITEMS=[], orderCart={}, shopCart={};
+let orderMode='order'; // 'order' | 'shop'
+let activeCat='全部', activeShopCat='全部';
+let newOrderCount=0;
+let orderAutoRefresh=null;
+
+// ── Firestore helpers ─────────────────────────────────
+async function loadMenuItems(){
+  const snap=await window._getDocs(window._col(db,'menu'));
+  MENU_ITEMS=snap.docs.map(d=>d.data()).filter(d=>d.type==='drink');
+}
+async function loadShopItems(){
+  const snap=await window._getDocs(window._col(db,'menu'));
+  SHOP_ITEMS=snap.docs.map(d=>d.data()).filter(d=>d.type==='shop');
+}
+async function saveMenuItem(item){ await window._setDoc(window._doc(db,'menu',item.id),item); }
+async function delMenuItem(id){ await window._setDoc(window._doc(db,'menu',id),{id,deleted:true}); }
+
+async function submitOrderToDB(orderData){
+  const id='ORD-'+Date.now();
+  await window._setDoc(window._doc(db,'orders',id),{...orderData,id,createdAt:nowStr(),status:'pending'});
+  return id;
+}
+async function loadOrders(){
+  const snap=await window._getDocs(window._col(db,'orders'));
+  return snap.docs.map(d=>d.data()).filter(d=>!d.deleted).sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
+}
+async function updateOrderStatus(id,status){
+  await window._setDoc(window._doc(db,'orders',id),{status},{ merge:true });
+}
+
+// ── 流水號 ────────────────────────────────────────────
+async function getNextOrderNum(){
+  const ref=window._doc(db,'config','orderNum');
+  const snap=await window._getDoc(ref);
+  const current=snap.exists()?snap.data().num||0:0;
+  const next=(current%999)+1;
+  await window._setDoc(ref,{num:next});
+  return String(next).padStart(3,'0');
+}
+
+// ════════════════════════════════════════
+//  客戶端：點餐
+// ════════════════════════════════════════
+async function renderOrderMenu(){
+  await loadMenuItems();
+  const items=MENU_ITEMS.filter(m=>!m.deleted);
+  const cats=['全部',...new Set(items.map(m=>m.category).filter(Boolean))];
+
+  const cartTotal=Object.entries(orderCart).reduce((s,[id,q])=>{
+    const it=items.find(x=>x.id===id); return it?s+it.price*q:s;},0);
+  const cartCount=Object.values(orderCart).reduce((s,q)=>s+q,0);
+
+  const filtered=activeCat==='全部'?items:items.filter(m=>m.category===activeCat);
+
+  document.getElementById('c-order').innerHTML=\`
+    <div class="menu-section">
+      <div style="font-size:13px;color:var(--mist);margin-bottom:12px;background:#fff;border-radius:12px;padding:10px 14px;box-shadow:0 2px 8px rgba(0,0,0,.05)">
+        🍽 點完後送出，我們會送餐到桌邊，<strong>離開時再至櫃台結帳</strong>
+      </div>
+      <div class="menu-cat-bar">\${cats.map(c=>\`<button class="menu-cat-btn\${activeCat===c?' active':''}" onclick="setOrderCat('\${c}',this)">\${c}</button>\`).join('')}</div>
+      <div class="menu-item-list">\${filtered.map(item=>\`
+        <div class="menu-item-card\${!item.available?' unavail':''}" onclick="\${item.available!==false?'addOrderItem(\''+item.id+'\')':''}" >
+          <div class="menu-item-left">
+            <div class="menu-item-name">\${item.name}\${item.available===false?' <span style=\"font-size:11px;color:var(--blush)\">（暫停供應）</span>':''}</div>
+            \${item.desc?\`<div class="menu-item-desc">\${item.desc}</div>\`:''}
+            <div class="menu-item-price">NT\$\${item.price}</div>
+          </div>
+          <div class="menu-item-right">
+            \${orderCart[item.id]?\`
+              <button class="item-qty-btn" onclick="event.stopPropagation();removeOrderItem('\${item.id}')">−</button>
+              <span class="item-qty-num">\${orderCart[item.id]}</span>\`:''}
+            <button class="item-qty-btn" onclick="event.stopPropagation();addOrderItem('\${item.id}')">+</button>
+          </div>
+        </div>\`).join('')}
+      </div>
+      \${!items.length?\`<div style="text-align:center;padding:40px 0;color:var(--mist)">菜單準備中，請稍後</div>\`:''}
+    </div>
+    \${cartCount>0?\`<button class="order-float" onclick="openOrderCart('order')">🛒 查看訂單 <span class="order-float-badge">\${cartCount} 項・NT\$\${cartTotal}</span></button>\`:''}
+  \`;
+}
+
+function setOrderCat(cat,btn){
+  activeCat=cat;
+  renderOrderMenu();
+}
+function addOrderItem(id){ orderCart[id]=(orderCart[id]||0)+1; renderOrderMenu(); }
+function removeOrderItem(id){ orderCart[id]=(orderCart[id]||0)-1; if(orderCart[id]<=0)delete orderCart[id]; renderOrderMenu(); }
+
+// ════════════════════════════════════════
+//  客戶端：商店
+// ════════════════════════════════════════
+async function renderShopMenu(){
+  await loadShopItems();
+  const items=SHOP_ITEMS.filter(m=>!m.deleted);
+  const cats=['全部',...new Set(items.map(m=>m.category).filter(Boolean))];
+  const cartCount=Object.values(shopCart).reduce((s,q)=>s+q,0);
+  const cartTotal=Object.entries(shopCart).reduce((s,[id,q])=>{const it=items.find(x=>x.id===id);return it?s+it.price*q:s;},0);
+  const filtered=activeShopCat==='全部'?items:items.filter(m=>m.category===activeShopCat);
+
+  document.getElementById('c-shop').innerHTML=\`
+    <div class="menu-section">
+      <div style="font-size:13px;color:var(--mist);margin-bottom:12px;background:#fff;border-radius:12px;padding:10px 14px;box-shadow:0 2px 8px rgba(0,0,0,.05)">
+        🛍 選購後送出，商品會送到桌邊，<strong>離開時再至櫃台結帳</strong>
+      </div>
+      <div class="menu-cat-bar">\${cats.map(c=>\`<button class="menu-cat-btn\${activeShopCat===c?' active':''}" onclick="setShopCat('\${c}',this)">\${c}</button>\`).join('')}</div>
+      <div class="menu-item-list">\${filtered.map(item=>\`
+        <div class="menu-item-card\${!item.available?' unavail':''}" onclick="\${item.available!==false?'addShopItem(\''+item.id+'\')':''}">
+          <div class="menu-item-left">
+            <div class="menu-item-name">\${item.name}\${item.available===false?' <span style=\"font-size:11px;color:var(--blush)\">（售完）</span>':''}</div>
+            \${item.desc?\`<div class="menu-item-desc">\${item.desc}</div>\`:''}
+            <div class="menu-item-price">NT\$\${item.price}</div>
+          </div>
+          <div class="menu-item-right">
+            \${shopCart[item.id]?\`
+              <button class="item-qty-btn" onclick="event.stopPropagation();removeShopItem('\${item.id}')">−</button>
+              <span class="item-qty-num">\${shopCart[item.id]}</span>\`:''}
+            <button class="item-qty-btn" onclick="event.stopPropagation();addShopItem('\${item.id}')">+</button>
+          </div>
+        </div>\`).join('')}
+      </div>
+      \${!items.length?\`<div style="text-align:center;padding:40px 0;color:var(--mist)">商品上架中，請稍後</div>\`:''}
+    </div>
+    \${cartCount>0?\`<button class="order-float" onclick="openOrderCart('shop')">🛒 查看購物車 <span class="order-float-badge">\${cartCount} 項・NT\$\${cartTotal}</span></button>\`:''}
+  \`;
+}
+function setShopCat(cat){ activeShopCat=cat; renderShopMenu(); }
+function addShopItem(id){ shopCart[id]=(shopCart[id]||0)+1; renderShopMenu(); }
+function removeShopItem(id){ shopCart[id]=(shopCart[id]||0)-1; if(shopCart[id]<=0)delete shopCart[id]; renderShopMenu(); }
+
+// ── 購物車面板 ────────────────────────────────────────
+function openOrderCart(mode){
+  orderMode=mode;
+  const cart=mode==='order'?orderCart:shopCart;
+  const items=mode==='order'?MENU_ITEMS:SHOP_ITEMS;
+  const label=mode==='order'?'確認點餐':'確認購物車';
+
+  document.getElementById('order-cart-title').textContent=label;
+  document.getElementById('order-note').value='';
+
+  let html='', total=0;
+  Object.entries(cart).forEach(([id,qty])=>{
+    const item=items.find(x=>x.id===id); if(!item)return;
+    total+=item.price*qty;
+    html+=\`<div class="order-panel-item">
+      <div><div class="order-panel-name">\${item.name}</div><div style="font-size:12px;color:var(--mist)">x\${qty}</div></div>
+      <div class="order-panel-price">NT\$\${item.price*qty}</div>
+    </div>\`;
+  });
+  document.getElementById('order-cart-items').innerHTML=html;
+  document.getElementById('order-cart-total').textContent='NT\$'+total;
+  document.getElementById('order-cart-total-row').style.display='flex';
+  document.getElementById('order-cart-overlay').classList.add('open');
+}
+function closeOrderCart(){ document.getElementById('order-cart-overlay').classList.remove('open'); }
+
+async function submitOrder(){
+  const cart=orderMode==='order'?orderCart:shopCart;
+  const items=orderMode==='order'?MENU_ITEMS:SHOP_ITEMS;
+  const note=document.getElementById('order-note').value;
+  const btn=document.getElementById('order-submit-btn');
+  btn.disabled=true; btn.textContent='送出中…';
+
+  const orderItems=Object.entries(cart).map(([id,qty])=>{
+    const item=items.find(x=>x.id===id); return {id,name:item.name,price:item.price,qty};
+  });
+  const total=orderItems.reduce((s,x)=>s+x.price*x.qty,0);
+  const num=await getNextOrderNum();
+
+  await submitOrderToDB({
+    num, type:orderMode, items:orderItems, total, note,
+    memberName:currentUser?.displayName||'',
+    memberId:currentUser?.uid||''
+  });
+
+  // 清空購物車
+  if(orderMode==='order') { orderCart={}; }
+  else { shopCart={}; }
+
+  // 顯示成功畫面
+  const typeLabel=orderMode==='order'?'點餐':'商店';
+  document.getElementById('order-cart-items').innerHTML=\`
+    <div class="order-success">
+      <div style="font-size:48px">✅</div>
+      <div class="order-success-label">訂單編號</div>
+      <div class="order-success-num">#\${num}</div>
+      <div class="order-success-hint">\${orderMode==='order'?'我們會盡快送餐到桌邊':'商品即將送到桌邊'}<br>離開時請至櫃台結帳</div>
+    </div>\`;
+  document.getElementById('order-cart-total-row').style.display='none';
+  document.getElementById('order-note').style.display='none';
+  btn.style.display='none';
+  document.querySelector('#order-cart-overlay .close-btn').textContent='關閉';
+
+  setTimeout(()=>{
+    closeOrderCart();
+    document.getElementById('order-note').style.display='block';
+    btn.style.display='block'; btn.disabled=false; btn.textContent='送出訂單';
+    if(orderMode==='order') renderOrderMenu(); else renderShopMenu();
+  },3000);
+}
+
+// ════════════════════════════════════════
+//  管理端：點餐管理
+// ════════════════════════════════════════
+async function renderAdminOrders(){
+  const orders=await loadOrders();
+  const pending=orders.filter(o=>o.status==='pending');
+  const done=orders.filter(o=>o.status==='done').slice(0,10);
+
+  document.getElementById('a-orders').innerHTML=\`
+    \${pending.length?\`<div class="new-order-banner">🔔 目前有 \${pending.length} 筆待處理訂單</div>\`:''}
+    <div class="a-card-title" style="font-size:15px;font-weight:700;margin-bottom:12px">⏳ 待處理（\${pending.length}）</div>
+    \${!pending.length?\`<div class="no-orders">目前沒有待處理訂單 ☕</div>\`:''}
+    <div class="order-tickets">\${pending.map(o=>\`
+      <div class="ticket" id="ticket-\${o.id}">
+        <div class="ticket-header">
+          <div class="ticket-num">#\${o.num}</div>
+          <div>
+            <span class="ticket-type\${o.type==='shop'?' shop':''}">\${o.type==='order'?'點餐':'商店'}</span>
+            <div class="ticket-time">\${o.createdAt}</div>
+          </div>
+        </div>
+        <div class="ticket-items">\${o.items.map(i=>\`\${i.name} x\${i.qty}\`).join('<br>')}</div>
+        \${o.note?\`<div class="ticket-note">備註：\${o.note}</div>\`:''}
+        <div style="font-weight:700;color:var(--caramel);margin-bottom:10px">NT\$\${o.total}</div>
+        <button class="ticket-done-btn" onclick="markOrderDone('\${o.id}')">✓ 標記完成</button>
+      </div>\`).join('')}
+    </div>
+    <div class="a-card-title" style="font-size:15px;font-weight:700;margin:20px 0 12px">✅ 已完成（最近10筆）</div>
+    <div class="order-tickets">\${done.map(o=>\`
+      <div class="ticket done">
+        <div class="ticket-header">
+          <div class="ticket-num" style="color:var(--mist)">#\${o.num}</div>
+          <span class="ticket-type\${o.type==='shop'?' shop':''}">\${o.type==='order'?'點餐':'商店'}</span>
+        </div>
+        <div class="ticket-items" style="color:var(--mist)">\${o.items.map(i=>\`\${i.name} x\${i.qty}\`).join('、')}</div>
+      </div>\`).join('')}
+    </div>\`;
+
+  // 啟動自動刷新（每10秒）
+  if(orderAutoRefresh) clearInterval(orderAutoRefresh);
+  orderAutoRefresh=setInterval(()=>{
+    const activeView=document.querySelector('#mode-admin .view.show')?.id;
+    if(activeView==='a-orders') renderAdminOrders();
+  },10000);
+}
+
+async function markOrderDone(id){
+  await updateOrderStatus(id,'done');
+  showToast('✅ 訂單已完成');
+  renderAdminOrders();
+}
+
+// ════════════════════════════════════════
+//  管理端：現場代點
+// ════════════════════════════════════════
+let posCart={};
+async function renderAdminPOS(){
+  await loadMenuItems();
+  const items=MENU_ITEMS.filter(m=>!m.deleted&&m.available!==false);
+  const posTotal=Object.entries(posCart).reduce((s,[id,q])=>{const it=items.find(x=>x.id===id);return it?s+it.price*q:s;},0);
+  const posCount=Object.values(posCart).reduce((s,q)=>s+q,0);
+
+  document.getElementById('a-pos').innerHTML=\`
+    <div class="pos-wrap">
+      <div class="pos-menu">
+        <div class="a-card-title">🍽 選擇品項</div>
+        \${items.map(item=>\`
+          <div class="pos-item-card" onclick="posAddItem('\${item.id}')">
+            <div>
+              <div style="font-weight:600;font-size:14px">\${item.name}</div>
+              <div style="font-size:12px;color:var(--caramel)">NT\$\${item.price}</div>
+            </div>
+            \${posCart[item.id]?\`<span style="background:var(--caramel);color:#fff;border-radius:12px;padding:2px 10px;font-weight:700;font-size:13px">x\${posCart[item.id]}</span>\`:'<span style="color:var(--mist);font-size:20px">+</span>'}
+          </div>\`).join('')}
+      </div>
+      <div class="pos-cart">
+        <div class="pos-cart-title">🧾 目前訂單</div>
+        \${!posCount?\`<div class="pos-cart-empty">點擊左側品項加入</div>\`:
+          Object.entries(posCart).map(([id,qty])=>{
+            const it=items.find(x=>x.id===id); if(!it)return'';
+            return\`<div class="pos-cart-item">
+              <div>
+                <div style="font-weight:600;font-size:13px">\${it.name}</div>
+                <div style="font-size:12px;color:var(--mist)">x\${qty}</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <div style="font-weight:700;color:var(--caramel);font-size:13px">NT\$\${it.price*qty}</div>
+                <button class="item-qty-btn" style="width:24px;height:24px;font-size:14px" onclick="posRemoveItem('\${id}')">−</button>
+              </div>
+            </div>\`;}).join('')}
+        \${posCount?\`<div class="pos-total"><span>合計</span><span style="color:var(--caramel)">NT\$\${posTotal}</span></div>
+        <textarea class="order-note-input" id="pos-note" placeholder="備註" rows="2" style="margin-bottom:10px"></textarea>
+        <button class="pos-submit" onclick="posSubmit()">送出訂單並出單</button>
+        <button class="pos-clear" onclick="posClear()">清空</button>\`:''}
+      </div>
+    </div>\`;
+}
+function posAddItem(id){ posCart[id]=(posCart[id]||0)+1; renderAdminPOS(); }
+function posRemoveItem(id){ posCart[id]=(posCart[id]||0)-1; if(posCart[id]<=0)delete posCart[id]; renderAdminPOS(); }
+function posClear(){ posCart={}; renderAdminPOS(); }
+async function posSubmit(){
+  const items=MENU_ITEMS.filter(m=>!m.deleted);
+  const note=document.getElementById('pos-note')?.value||'';
+  const orderItems=Object.entries(posCart).map(([id,qty])=>{
+    const it=items.find(x=>x.id===id); return{id,name:it.name,price:it.price,qty};});
+  const total=orderItems.reduce((s,x)=>s+x.price*x.qty,0);
+  const num=await getNextOrderNum();
+  await submitOrderToDB({num,type:'order',items:orderItems,total,note,memberName:'現場代點',memberId:''});
+  showToast(\`✅ 訂單 #\${num} 已送出\`);
+  posCart={};
+  renderAdminPOS();
+}
+
+// ════════════════════════════════════════
+//  管理端：菜單管理
+// ════════════════════════════════════════
+async function renderAdminMenuMgmt(){
+  await loadMenuItems();
+  const items=MENU_ITEMS.filter(m=>!m.deleted);
+  document.getElementById('a-menu-mgmt').innerHTML=\`
+    <div class="mgmt-form a-card">
+      <div class="a-card-title">➕ 新增飲品</div>
+      <input class="mgmt-input" id="mn-name" placeholder="飲品名稱">
+      <input class="mgmt-input" id="mn-desc" placeholder="描述（可不填）">
+      <div class="mgmt-row" style="margin-bottom:10px">
+        <input class="mgmt-input" id="mn-price" placeholder="價格" type="number">
+        <input class="mgmt-input" id="mn-cat" placeholder="分類（如：咖啡、茶飲）">
+        <button class="mgmt-add-btn" onclick="addMenuItem()">新增</button>
+      </div>
+    </div>
+    <div class="a-card">
+      <div class="a-card-title">☕ 飲品列表</div>
+      \${!items.length?'<div style="color:var(--mist);font-size:13px">尚無品項</div>':
+        items.map(item=>\`
+        <div class="mgmt-item-row">
+          <div>
+            <div class="mgmt-item-name">\${item.name}</div>
+            <div class="mgmt-item-cat">\${item.category||'未分類'}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div class="mgmt-item-price">NT\$\${item.price}</div>
+            <button class="avail-toggle \${item.available!==false?'on':'off'}" onclick="toggleMenuAvail('\${item.id}',\${item.available!==false})">
+              \${item.available!==false?'供應中':'已暫停'}
+            </button>
+            <button class="mgmt-del-btn" onclick="deleteMenuItem('\${item.id}')">刪除</button>
+          </div>
+        </div>\`).join('')}
+    </div>\`;
+}
+
+async function addMenuItem(){
+  const name=document.getElementById('mn-name').value.trim();
+  const price=parseInt(document.getElementById('mn-price').value);
+  const cat=document.getElementById('mn-cat').value.trim();
+  const desc=document.getElementById('mn-desc').value.trim();
+  if(!name||!price){showToast('請填寫名稱和價格');return;}
+  const id='MN-'+Date.now();
+  await saveMenuItem({id,name,price,category:cat,desc,type:'drink',available:true});
+  showToast('✅ 已新增 '+name);
+  document.getElementById('mn-name').value='';
+  document.getElementById('mn-price').value='';
+  document.getElementById('mn-cat').value='';
+  document.getElementById('mn-desc').value='';
+  renderAdminMenuMgmt();
+}
+async function toggleMenuAvail(id,current){
+  const item=MENU_ITEMS.find(x=>x.id===id); if(!item)return;
+  await saveMenuItem({...item,available:!current});
+  renderAdminMenuMgmt();
+}
+async function deleteMenuItem(id){
+  if(!confirm('確定刪除此品項？'))return;
+  const item=MENU_ITEMS.find(x=>x.id===id); if(!item)return;
+  await saveMenuItem({...item,deleted:true});
+  showToast('已刪除');
+  renderAdminMenuMgmt();
+}
+
+// ════════════════════════════════════════
+//  管理端：商店管理
+// ════════════════════════════════════════
+async function renderAdminShopMgmt(){
+  await loadShopItems();
+  const items=SHOP_ITEMS.filter(m=>!m.deleted);
+  document.getElementById('a-shop-mgmt').innerHTML=\`
+    <div class="mgmt-form a-card">
+      <div class="a-card-title">➕ 新增商品</div>
+      <input class="mgmt-input" id="sh-name" placeholder="商品名稱">
+      <input class="mgmt-input" id="sh-desc" placeholder="描述（可不填）">
+      <div class="mgmt-row" style="margin-bottom:10px">
+        <input class="mgmt-input" id="sh-price" placeholder="價格" type="number">
+        <input class="mgmt-input" id="sh-cat" placeholder="分類（如：咖啡豆、周邊）">
+        <button class="mgmt-add-btn" onclick="addShopItemDB()">新增</button>
+      </div>
+    </div>
+    <div class="a-card">
+      <div class="a-card-title">🛍 商品列表</div>
+      \${!items.length?'<div style="color:var(--mist);font-size:13px">尚無商品</div>':
+        items.map(item=>\`
+        <div class="mgmt-item-row">
+          <div>
+            <div class="mgmt-item-name">\${item.name}</div>
+            <div class="mgmt-item-cat">\${item.category||'未分類'}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div class="mgmt-item-price">NT\$\${item.price}</div>
+            <button class="avail-toggle \${item.available!==false?'on':'off'}" onclick="toggleShopAvail('\${item.id}',\${item.available!==false})">
+              \${item.available!==false?'上架中':'已下架'}
+            </button>
+            <button class="mgmt-del-btn" onclick="deleteShopItem('\${item.id}')">刪除</button>
+          </div>
+        </div>\`).join('')}
+    </div>\`;
+}
+async function addShopItemDB(){
+  const name=document.getElementById('sh-name').value.trim();
+  const price=parseInt(document.getElementById('sh-price').value);
+  const cat=document.getElementById('sh-cat').value.trim();
+  const desc=document.getElementById('sh-desc').value.trim();
+  if(!name||!price){showToast('請填寫名稱和價格');return;}
+  const id='SH-'+Date.now();
+  await saveMenuItem({id,name,price,category:cat,desc,type:'shop',available:true});
+  showToast('✅ 已新增 '+name);
+  document.getElementById('sh-name').value='';
+  document.getElementById('sh-price').value='';
+  document.getElementById('sh-cat').value='';
+  document.getElementById('sh-desc').value='';
+  renderAdminShopMgmt();
+}
+async function toggleShopAvail(id,current){
+  const item=SHOP_ITEMS.find(x=>x.id===id); if(!item)return;
+  await saveMenuItem({...item,available:!current});
+  renderAdminShopMgmt();
+}
+async function deleteShopItem(id){
+  if(!confirm('確定刪除此商品？'))return;
+  const item=SHOP_ITEMS.find(x=>x.id===id); if(!item)return;
+  await saveMenuItem({...item,deleted:true});
+  showToast('已刪除');
+  renderAdminShopMgmt();
 }
 
 if(window._fbReady){ initFirebase(); }
