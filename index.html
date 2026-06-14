@@ -445,9 +445,9 @@ input[type=range]{width:100%;accent-color:var(--caramel);cursor:pointer;}
 .cart-bottom-btn{padding:12px 20px;background:var(--dark);color:#fff;border:none;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;white-space:nowrap;}
 
 /* 客戶端雙欄點餐版面 */
-.order-layout{display:grid;grid-template-columns:1fr 300px;gap:0;min-height:calc(100vh - 56px);max-width:860px;margin:0 auto;}
+.order-layout{display:grid;grid-template-columns:1fr 260px;gap:0;min-height:calc(100vh - 56px);}
 .order-menu-col{padding:16px 16px 40px;overflow-y:auto;}
-.order-cart-col{background:#fff;border-left:1px solid #f0ebe4;padding:16px;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;display:flex;flex-direction:column;}
+.order-cart-col{background:#fff;border-left:1px solid #f0ebe4;padding:14px;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;display:flex;flex-direction:column;min-width:220px;max-width:260px;}
 .order-cart-col-title{font-size:15px;font-weight:700;margin-bottom:12px;color:var(--dark);}
 .order-cart-empty{flex:1;display:flex;align-items:center;justify-content:center;color:var(--mist);font-size:13px;text-align:center;padding:20px 0;}
 .order-cart-entries{flex:1;overflow-y:auto;}
@@ -472,6 +472,15 @@ input[type=range]{width:100%;accent-color:var(--caramel);cursor:pointer;}
   .order-layout{grid-template-columns:1fr;}
   .order-cart-col{display:none;} /* 手機用底部欄 */
 }
+
+/* 送出訂單提醒 */
+.order-alert-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:400;display:none;align-items:center;justify-content:center;padding:20px;}
+.order-alert-overlay.open{display:flex;}
+.order-alert-box{background:#fff;border-radius:24px;padding:36px 28px;max-width:340px;width:100%;text-align:center;box-shadow:0 16px 48px rgba(0,0,0,.25);}
+.order-alert-icon{font-size:52px;margin-bottom:14px;}
+.order-alert-title{font-size:20px;font-weight:700;margin-bottom:10px;}
+.order-alert-msg{font-size:14px;color:var(--mist);line-height:1.7;margin-bottom:24px;}
+.order-alert-btn{width:100%;padding:14px;background:var(--dark);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;}
 </style>
 </head>
 <body>
@@ -563,6 +572,19 @@ input[type=range]{width:100%;accent-color:var(--caramel);cursor:pointer;}
         你的外帶中杯飲品兌換券已成功核銷<br>請向店員取餐，享用你的咖啡 ☕
       </div>
       <button class="panel-btn" onclick="closeSuccessAndRefresh()">回到集點卡</button>
+    </div>
+  </div>
+
+  <!-- 送出訂單提醒 overlay -->
+  <div class="order-alert-overlay" id="order-alert-overlay">
+    <div class="order-alert-box">
+      <div class="order-alert-icon">✅</div>
+      <div class="order-alert-title" id="order-alert-title">訂單已送出！</div>
+      <div class="order-alert-msg">
+        離開時請將帳單帶至<strong>櫃台結帳</strong><br>
+        我們會盡快為您送上餐點 ☕
+      </div>
+      <button class="order-alert-btn" onclick="closeOrderAlert()">繼續點餐</button>
     </div>
   </div>
 
@@ -2084,14 +2106,18 @@ function compressImage(file, maxWidth, maxHeight, quality){
 async function handleImageUpload(input){
   const file = input.files[0];
   if(!file) return;
-  showToast('壓縮圖片中…');
-  // 壓縮到最大 600x600，品質 0.75
-  const compressed = await compressImage(file, 600, 600, 0.75);
+  const originalKB = Math.round(file.size / 1024);
+  showToast('處理圖片中…');
+  // 自動壓縮：超過 300KB 降低品質，超過 1MB 縮小尺寸
+  let maxW=800, maxH=800, quality=0.8;
+  if(file.size > 1024*1024){ maxW=600; maxH=600; quality=0.7; }
+  else if(file.size > 500*1024){ quality=0.72; }
+  const compressed = await compressImage(file, maxW, maxH, quality);
   editingImageBase64 = compressed;
   const preview = document.getElementById('img-preview');
   if(preview){ preview.src = compressed; preview.style.display='block'; }
-  const kb = Math.round(compressed.length * 0.75 / 1024);
-  showToast(`✅ 圖片已壓縮（約 ${kb}KB）`);
+  const compressedKB = Math.round(compressed.length * 0.75 / 1024);
+  showToast(`✅ 圖片處理完成（${originalKB}KB → 約${compressedKB}KB）`);
 }
 
 // ════════════════════════════════════════
@@ -2220,7 +2246,7 @@ async function inlineCartSubmit(mode){
   });
   sentOrders.push({num,items:orderItems});
   pendingCart={};
-  showToast(`✅ 訂單 #${num} 已送出！`);
+  showOrderSubmitAlert(num);
   if(mode==='order') renderOrderMenu(); else renderShopMenu();
   updateCartBottomBar();
 }
@@ -2547,7 +2573,8 @@ async function submitCartSidebar(){
   renderCartSidebar();
   updateNewCartFloat();
   updateCartBottomBar();
-  showToast(`✅ 訂單 #${num} 已送出！`);
+  closeCartSidebar();
+  showOrderSubmitAlert(num);
 }
 
 function updateNewCartFloat(){
@@ -2926,6 +2953,15 @@ function handleImageUpload(input){
     if(preview){ preview.src = editingImageBase64; preview.style.display='block'; }
   };
   reader.readAsDataURL(file);
+}
+
+
+function showOrderSubmitAlert(num){
+  document.getElementById('order-alert-title').textContent = `訂單 #${num} 已送出！`;
+  document.getElementById('order-alert-overlay').classList.add('open');
+}
+function closeOrderAlert(){
+  document.getElementById('order-alert-overlay').classList.remove('open');
 }
 
 if(window._fbReady){ initFirebase(); }
