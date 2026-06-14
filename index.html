@@ -1084,31 +1084,31 @@ async function renderOrderMenu(){
 
   const filtered=activeCat==='全部'?items:items.filter(m=>m.category===activeCat);
 
-  document.getElementById('c-order').innerHTML=\`
+  document.getElementById('c-order').innerHTML=`
     <div class="menu-section">
       <div style="font-size:13px;color:var(--mist);margin-bottom:12px;background:#fff;border-radius:12px;padding:10px 14px;box-shadow:0 2px 8px rgba(0,0,0,.05)">
         🍽 點完後送出，我們會送餐到桌邊，<strong>離開時再至櫃台結帳</strong>
       </div>
-      <div class="menu-cat-bar">\${cats.map(c=>\`<button class="menu-cat-btn\${activeCat===c?' active':''}" onclick="setOrderCat('\${c}',this)">\${c}</button>\`).join('')}</div>
-      <div class="menu-item-list">\${filtered.map(item=>\`
-        <div class="menu-item-card\${!item.available?' unavail':''}" onclick="\${item.available!==false?'addOrderItem(\''+item.id+'\')':''}" >
+      <div class="menu-cat-bar">${cats.map(c=>`<button class="menu-cat-btn${activeCat===c?' active':''}" onclick="setOrderCat('${c}',this)">${c}</button>`).join('')}</div>
+      <div class="menu-item-list">${filtered.map(item=>`
+        <div class="menu-item-card${!item.available?' unavail':''}" onclick="${item.available!==false?'addOrderItem(\''+item.id+'\')':''}" >
           <div class="menu-item-left">
-            <div class="menu-item-name">\${item.name}\${item.available===false?' <span style=\"font-size:11px;color:var(--blush)\">（暫停供應）</span>':''}</div>
-            \${item.desc?\`<div class="menu-item-desc">\${item.desc}</div>\`:''}
-            <div class="menu-item-price">NT\$\${item.price}</div>
+            <div class="menu-item-name">${item.name}${item.available===false?' <span style=\"font-size:11px;color:var(--blush)\">（暫停供應）</span>':''}</div>
+            ${item.desc?`<div class="menu-item-desc">${item.desc}</div>`:''}
+            <div class="menu-item-price">NT\$${item.price}</div>
           </div>
           <div class="menu-item-right">
-            \${orderCart[item.id]?\`
-              <button class="item-qty-btn" onclick="event.stopPropagation();removeOrderItem('\${item.id}')">−</button>
-              <span class="item-qty-num">\${orderCart[item.id]}</span>\`:''}
-            <button class="item-qty-btn" onclick="event.stopPropagation();addOrderItem('\${item.id}')">+</button>
+            ${orderCart[item.id]?`
+              <button class="item-qty-btn" onclick="event.stopPropagation();removeOrderItem('${item.id}')">−</button>
+              <span class="item-qty-num">${orderCart[item.id]}</span>`:''}
+            <button class="item-qty-btn" onclick="event.stopPropagation();addOrderItem('${item.id}')">+</button>
           </div>
-        </div>\`).join('')}
+        </div>`).join('')}
       </div>
-      \${!items.length?\`<div style="text-align:center;padding:40px 0;color:var(--mist)">菜單準備中，請稍後</div>\`:''}
+      ${!items.length?`<div style="text-align:center;padding:40px 0;color:var(--mist)">菜單準備中，請稍後</div>`:''}
     </div>
-    \${cartCount>0?\`<button class="order-float" onclick="openOrderCart('order')">🛒 查看訂單 <span class="order-float-badge">\${cartCount} 項・NT\$\${cartTotal}</span></button>\`:''}
-  \`;
+    ${cartCount>0?`<button class="order-float" onclick="openOrderCart('order')">🛒 查看訂單 <span class="order-float-badge">${cartCount} 項・NT\$${cartTotal}</span></button>`:''}
+  `;
 }
 
 function setOrderCat(cat,btn){
@@ -1129,31 +1129,31 @@ async function renderShopMenu(){
   const cartTotal=Object.entries(shopCart).reduce((s,[id,q])=>{const it=items.find(x=>x.id===id);return it?s+it.price*q:s;},0);
   const filtered=activeShopCat==='全部'?items:items.filter(m=>m.category===activeShopCat);
 
-  document.getElementById('c-shop').innerHTML=\`
+  document.getElementById('c-shop').innerHTML=`
     <div class="menu-section">
       <div style="font-size:13px;color:var(--mist);margin-bottom:12px;background:#fff;border-radius:12px;padding:10px 14px;box-shadow:0 2px 8px rgba(0,0,0,.05)">
         🛍 選購後送出，商品會送到桌邊，<strong>離開時再至櫃台結帳</strong>
       </div>
-      <div class="menu-cat-bar">\${cats.map(c=>\`<button class="menu-cat-btn\${activeShopCat===c?' active':''}" onclick="setShopCat('\${c}',this)">\${c}</button>\`).join('')}</div>
-      <div class="menu-item-list">\${filtered.map(item=>\`
-        <div class="menu-item-card\${!item.available?' unavail':''}" onclick="\${item.available!==false?'addShopItem(\''+item.id+'\')':''}">
+      <div class="menu-cat-bar">${cats.map(c=>`<button class="menu-cat-btn${activeShopCat===c?' active':''}" onclick="setShopCat('${c}',this)">${c}</button>`).join('')}</div>
+      <div class="menu-item-list">${filtered.map(item=>`
+        <div class="menu-item-card${!item.available?' unavail':''}" onclick="${item.available!==false?'addShopItem(\''+item.id+'\')':''}">
           <div class="menu-item-left">
-            <div class="menu-item-name">\${item.name}\${item.available===false?' <span style=\"font-size:11px;color:var(--blush)\">（售完）</span>':''}</div>
-            \${item.desc?\`<div class="menu-item-desc">\${item.desc}</div>\`:''}
-            <div class="menu-item-price">NT\$\${item.price}</div>
+            <div class="menu-item-name">${item.name}${item.available===false?' <span style=\"font-size:11px;color:var(--blush)\">（售完）</span>':''}</div>
+            ${item.desc?`<div class="menu-item-desc">${item.desc}</div>`:''}
+            <div class="menu-item-price">NT\$${item.price}</div>
           </div>
           <div class="menu-item-right">
-            \${shopCart[item.id]?\`
-              <button class="item-qty-btn" onclick="event.stopPropagation();removeShopItem('\${item.id}')">−</button>
-              <span class="item-qty-num">\${shopCart[item.id]}</span>\`:''}
-            <button class="item-qty-btn" onclick="event.stopPropagation();addShopItem('\${item.id}')">+</button>
+            ${shopCart[item.id]?`
+              <button class="item-qty-btn" onclick="event.stopPropagation();removeShopItem('${item.id}')">−</button>
+              <span class="item-qty-num">${shopCart[item.id]}</span>`:''}
+            <button class="item-qty-btn" onclick="event.stopPropagation();addShopItem('${item.id}')">+</button>
           </div>
-        </div>\`).join('')}
+        </div>`).join('')}
       </div>
-      \${!items.length?\`<div style="text-align:center;padding:40px 0;color:var(--mist)">商品上架中，請稍後</div>\`:''}
+      ${!items.length?`<div style="text-align:center;padding:40px 0;color:var(--mist)">商品上架中，請稍後</div>`:''}
     </div>
-    \${cartCount>0?\`<button class="order-float" onclick="openOrderCart('shop')">🛒 查看購物車 <span class="order-float-badge">\${cartCount} 項・NT\$\${cartTotal}</span></button>\`:''}
-  \`;
+    ${cartCount>0?`<button class="order-float" onclick="openOrderCart('shop')">🛒 查看購物車 <span class="order-float-badge">${cartCount} 項・NT\$${cartTotal}</span></button>`:''}
+  `;
 }
 function setShopCat(cat){ activeShopCat=cat; renderShopMenu(); }
 function addShopItem(id){ shopCart[id]=(shopCart[id]||0)+1; renderShopMenu(); }
@@ -1173,10 +1173,10 @@ function openOrderCart(mode){
   Object.entries(cart).forEach(([id,qty])=>{
     const item=items.find(x=>x.id===id); if(!item)return;
     total+=item.price*qty;
-    html+=\`<div class="order-panel-item">
-      <div><div class="order-panel-name">\${item.name}</div><div style="font-size:12px;color:var(--mist)">x\${qty}</div></div>
-      <div class="order-panel-price">NT\$\${item.price*qty}</div>
-    </div>\`;
+    html+=`<div class="order-panel-item">
+      <div><div class="order-panel-name">${item.name}</div><div style="font-size:12px;color:var(--mist)">x${qty}</div></div>
+      <div class="order-panel-price">NT\$${item.price*qty}</div>
+    </div>`;
   });
   document.getElementById('order-cart-items').innerHTML=html;
   document.getElementById('order-cart-total').textContent='NT\$'+total;
@@ -1210,13 +1210,13 @@ async function submitOrder(){
 
   // 顯示成功畫面
   const typeLabel=orderMode==='order'?'點餐':'商店';
-  document.getElementById('order-cart-items').innerHTML=\`
+  document.getElementById('order-cart-items').innerHTML=`
     <div class="order-success">
       <div style="font-size:48px">✅</div>
       <div class="order-success-label">訂單編號</div>
-      <div class="order-success-num">#\${num}</div>
-      <div class="order-success-hint">\${orderMode==='order'?'我們會盡快送餐到桌邊':'商品即將送到桌邊'}<br>離開時請至櫃台結帳</div>
-    </div>\`;
+      <div class="order-success-num">#${num}</div>
+      <div class="order-success-hint">${orderMode==='order'?'我們會盡快送餐到桌邊':'商品即將送到桌邊'}<br>離開時請至櫃台結帳</div>
+    </div>`;
   document.getElementById('order-cart-total-row').style.display='none';
   document.getElementById('order-note').style.display='none';
   btn.style.display='none';
@@ -1238,35 +1238,35 @@ async function renderAdminOrders(){
   const pending=orders.filter(o=>o.status==='pending');
   const done=orders.filter(o=>o.status==='done').slice(0,10);
 
-  document.getElementById('a-orders').innerHTML=\`
-    \${pending.length?\`<div class="new-order-banner">🔔 目前有 \${pending.length} 筆待處理訂單</div>\`:''}
-    <div class="a-card-title" style="font-size:15px;font-weight:700;margin-bottom:12px">⏳ 待處理（\${pending.length}）</div>
-    \${!pending.length?\`<div class="no-orders">目前沒有待處理訂單 ☕</div>\`:''}
-    <div class="order-tickets">\${pending.map(o=>\`
-      <div class="ticket" id="ticket-\${o.id}">
+  document.getElementById('a-orders').innerHTML=`
+    ${pending.length?`<div class="new-order-banner">🔔 目前有 ${pending.length} 筆待處理訂單</div>`:''}
+    <div class="a-card-title" style="font-size:15px;font-weight:700;margin-bottom:12px">⏳ 待處理（${pending.length}）</div>
+    ${!pending.length?`<div class="no-orders">目前沒有待處理訂單 ☕</div>`:''}
+    <div class="order-tickets">${pending.map(o=>`
+      <div class="ticket" id="ticket-${o.id}">
         <div class="ticket-header">
-          <div class="ticket-num">#\${o.num}</div>
+          <div class="ticket-num">#${o.num}</div>
           <div>
-            <span class="ticket-type\${o.type==='shop'?' shop':''}">\${o.type==='order'?'點餐':'商店'}</span>
-            <div class="ticket-time">\${o.createdAt}</div>
+            <span class="ticket-type${o.type==='shop'?' shop':''}">${o.type==='order'?'點餐':'商店'}</span>
+            <div class="ticket-time">${o.createdAt}</div>
           </div>
         </div>
-        <div class="ticket-items">\${o.items.map(i=>\`\${i.name} x\${i.qty}\`).join('<br>')}</div>
-        \${o.note?\`<div class="ticket-note">備註：\${o.note}</div>\`:''}
-        <div style="font-weight:700;color:var(--caramel);margin-bottom:10px">NT\$\${o.total}</div>
-        <button class="ticket-done-btn" onclick="markOrderDone('\${o.id}')">✓ 標記完成</button>
-      </div>\`).join('')}
+        <div class="ticket-items">${o.items.map(i=>`${i.name} x${i.qty}`).join('<br>')}</div>
+        ${o.note?`<div class="ticket-note">備註：${o.note}</div>`:''}
+        <div style="font-weight:700;color:var(--caramel);margin-bottom:10px">NT\$${o.total}</div>
+        <button class="ticket-done-btn" onclick="markOrderDone('${o.id}')">✓ 標記完成</button>
+      </div>`).join('')}
     </div>
     <div class="a-card-title" style="font-size:15px;font-weight:700;margin:20px 0 12px">✅ 已完成（最近10筆）</div>
-    <div class="order-tickets">\${done.map(o=>\`
+    <div class="order-tickets">${done.map(o=>`
       <div class="ticket done">
         <div class="ticket-header">
-          <div class="ticket-num" style="color:var(--mist)">#\${o.num}</div>
-          <span class="ticket-type\${o.type==='shop'?' shop':''}">\${o.type==='order'?'點餐':'商店'}</span>
+          <div class="ticket-num" style="color:var(--mist)">#${o.num}</div>
+          <span class="ticket-type${o.type==='shop'?' shop':''}">${o.type==='order'?'點餐':'商店'}</span>
         </div>
-        <div class="ticket-items" style="color:var(--mist)">\${o.items.map(i=>\`\${i.name} x\${i.qty}\`).join('、')}</div>
-      </div>\`).join('')}
-    </div>\`;
+        <div class="ticket-items" style="color:var(--mist)">${o.items.map(i=>`${i.name} x${i.qty}`).join('、')}</div>
+      </div>`).join('')}
+    </div>`;
 
   // 啟動自動刷新（每10秒）
   if(orderAutoRefresh) clearInterval(orderAutoRefresh);
@@ -1292,40 +1292,40 @@ async function renderAdminPOS(){
   const posTotal=Object.entries(posCart).reduce((s,[id,q])=>{const it=items.find(x=>x.id===id);return it?s+it.price*q:s;},0);
   const posCount=Object.values(posCart).reduce((s,q)=>s+q,0);
 
-  document.getElementById('a-pos').innerHTML=\`
+  document.getElementById('a-pos').innerHTML=`
     <div class="pos-wrap">
       <div class="pos-menu">
         <div class="a-card-title">🍽 選擇品項</div>
-        \${items.map(item=>\`
-          <div class="pos-item-card" onclick="posAddItem('\${item.id}')">
+        ${items.map(item=>`
+          <div class="pos-item-card" onclick="posAddItem('${item.id}')">
             <div>
-              <div style="font-weight:600;font-size:14px">\${item.name}</div>
-              <div style="font-size:12px;color:var(--caramel)">NT\$\${item.price}</div>
+              <div style="font-weight:600;font-size:14px">${item.name}</div>
+              <div style="font-size:12px;color:var(--caramel)">NT\$${item.price}</div>
             </div>
-            \${posCart[item.id]?\`<span style="background:var(--caramel);color:#fff;border-radius:12px;padding:2px 10px;font-weight:700;font-size:13px">x\${posCart[item.id]}</span>\`:'<span style="color:var(--mist);font-size:20px">+</span>'}
-          </div>\`).join('')}
+            ${posCart[item.id]?`<span style="background:var(--caramel);color:#fff;border-radius:12px;padding:2px 10px;font-weight:700;font-size:13px">x${posCart[item.id]}</span>`:'<span style="color:var(--mist);font-size:20px">+</span>'}
+          </div>`).join('')}
       </div>
       <div class="pos-cart">
         <div class="pos-cart-title">🧾 目前訂單</div>
-        \${!posCount?\`<div class="pos-cart-empty">點擊左側品項加入</div>\`:
+        ${!posCount?`<div class="pos-cart-empty">點擊左側品項加入</div>`:
           Object.entries(posCart).map(([id,qty])=>{
             const it=items.find(x=>x.id===id); if(!it)return'';
-            return\`<div class="pos-cart-item">
+            return`<div class="pos-cart-item">
               <div>
-                <div style="font-weight:600;font-size:13px">\${it.name}</div>
-                <div style="font-size:12px;color:var(--mist)">x\${qty}</div>
+                <div style="font-weight:600;font-size:13px">${it.name}</div>
+                <div style="font-size:12px;color:var(--mist)">x${qty}</div>
               </div>
               <div style="display:flex;align-items:center;gap:6px">
-                <div style="font-weight:700;color:var(--caramel);font-size:13px">NT\$\${it.price*qty}</div>
-                <button class="item-qty-btn" style="width:24px;height:24px;font-size:14px" onclick="posRemoveItem('\${id}')">−</button>
+                <div style="font-weight:700;color:var(--caramel);font-size:13px">NT\$${it.price*qty}</div>
+                <button class="item-qty-btn" style="width:24px;height:24px;font-size:14px" onclick="posRemoveItem('${id}')">−</button>
               </div>
-            </div>\`;}).join('')}
-        \${posCount?\`<div class="pos-total"><span>合計</span><span style="color:var(--caramel)">NT\$\${posTotal}</span></div>
+            </div>`;}).join('')}
+        ${posCount?`<div class="pos-total"><span>合計</span><span style="color:var(--caramel)">NT\$${posTotal}</span></div>
         <textarea class="order-note-input" id="pos-note" placeholder="備註" rows="2" style="margin-bottom:10px"></textarea>
         <button class="pos-submit" onclick="posSubmit()">送出訂單並出單</button>
-        <button class="pos-clear" onclick="posClear()">清空</button>\`:''}
+        <button class="pos-clear" onclick="posClear()">清空</button>`:''}
       </div>
-    </div>\`;
+    </div>`;
 }
 function posAddItem(id){ posCart[id]=(posCart[id]||0)+1; renderAdminPOS(); }
 function posRemoveItem(id){ posCart[id]=(posCart[id]||0)-1; if(posCart[id]<=0)delete posCart[id]; renderAdminPOS(); }
@@ -1338,7 +1338,7 @@ async function posSubmit(){
   const total=orderItems.reduce((s,x)=>s+x.price*x.qty,0);
   const num=await getNextOrderNum();
   await submitOrderToDB({num,type:'order',items:orderItems,total,note,memberName:'現場代點',memberId:''});
-  showToast(\`✅ 訂單 #\${num} 已送出\`);
+  showToast(`✅ 訂單 #${num} 已送出`);
   posCart={};
   renderAdminPOS();
 }
@@ -1349,7 +1349,7 @@ async function posSubmit(){
 async function renderAdminMenuMgmt(){
   await loadMenuItems();
   const items=MENU_ITEMS.filter(m=>!m.deleted);
-  document.getElementById('a-menu-mgmt').innerHTML=\`
+  document.getElementById('a-menu-mgmt').innerHTML=`
     <div class="mgmt-form a-card">
       <div class="a-card-title">➕ 新增飲品</div>
       <input class="mgmt-input" id="mn-name" placeholder="飲品名稱">
@@ -1362,22 +1362,22 @@ async function renderAdminMenuMgmt(){
     </div>
     <div class="a-card">
       <div class="a-card-title">☕ 飲品列表</div>
-      \${!items.length?'<div style="color:var(--mist);font-size:13px">尚無品項</div>':
-        items.map(item=>\`
+      ${!items.length?'<div style="color:var(--mist);font-size:13px">尚無品項</div>':
+        items.map(item=>`
         <div class="mgmt-item-row">
           <div>
-            <div class="mgmt-item-name">\${item.name}</div>
-            <div class="mgmt-item-cat">\${item.category||'未分類'}</div>
+            <div class="mgmt-item-name">${item.name}</div>
+            <div class="mgmt-item-cat">${item.category||'未分類'}</div>
           </div>
           <div style="display:flex;align-items:center;gap:6px">
-            <div class="mgmt-item-price">NT\$\${item.price}</div>
-            <button class="avail-toggle \${item.available!==false?'on':'off'}" onclick="toggleMenuAvail('\${item.id}',\${item.available!==false})">
-              \${item.available!==false?'供應中':'已暫停'}
+            <div class="mgmt-item-price">NT\$${item.price}</div>
+            <button class="avail-toggle ${item.available!==false?'on':'off'}" onclick="toggleMenuAvail('${item.id}',${item.available!==false})">
+              ${item.available!==false?'供應中':'已暫停'}
             </button>
-            <button class="mgmt-del-btn" onclick="deleteMenuItem('\${item.id}')">刪除</button>
+            <button class="mgmt-del-btn" onclick="deleteMenuItem('${item.id}')">刪除</button>
           </div>
-        </div>\`).join('')}
-    </div>\`;
+        </div>`).join('')}
+    </div>`;
 }
 
 async function addMenuItem(){
@@ -1414,7 +1414,7 @@ async function deleteMenuItem(id){
 async function renderAdminShopMgmt(){
   await loadShopItems();
   const items=SHOP_ITEMS.filter(m=>!m.deleted);
-  document.getElementById('a-shop-mgmt').innerHTML=\`
+  document.getElementById('a-shop-mgmt').innerHTML=`
     <div class="mgmt-form a-card">
       <div class="a-card-title">➕ 新增商品</div>
       <input class="mgmt-input" id="sh-name" placeholder="商品名稱">
@@ -1427,22 +1427,22 @@ async function renderAdminShopMgmt(){
     </div>
     <div class="a-card">
       <div class="a-card-title">🛍 商品列表</div>
-      \${!items.length?'<div style="color:var(--mist);font-size:13px">尚無商品</div>':
-        items.map(item=>\`
+      ${!items.length?'<div style="color:var(--mist);font-size:13px">尚無商品</div>':
+        items.map(item=>`
         <div class="mgmt-item-row">
           <div>
-            <div class="mgmt-item-name">\${item.name}</div>
-            <div class="mgmt-item-cat">\${item.category||'未分類'}</div>
+            <div class="mgmt-item-name">${item.name}</div>
+            <div class="mgmt-item-cat">${item.category||'未分類'}</div>
           </div>
           <div style="display:flex;align-items:center;gap:6px">
-            <div class="mgmt-item-price">NT\$\${item.price}</div>
-            <button class="avail-toggle \${item.available!==false?'on':'off'}" onclick="toggleShopAvail('\${item.id}',\${item.available!==false})">
-              \${item.available!==false?'上架中':'已下架'}
+            <div class="mgmt-item-price">NT\$${item.price}</div>
+            <button class="avail-toggle ${item.available!==false?'on':'off'}" onclick="toggleShopAvail('${item.id}',${item.available!==false})">
+              ${item.available!==false?'上架中':'已下架'}
             </button>
-            <button class="mgmt-del-btn" onclick="deleteShopItem('\${item.id}')">刪除</button>
+            <button class="mgmt-del-btn" onclick="deleteShopItem('${item.id}')">刪除</button>
           </div>
-        </div>\`).join('')}
-    </div>\`;
+        </div>`).join('')}
+    </div>`;
 }
 async function addShopItemDB(){
   const name=document.getElementById('sh-name').value.trim();
