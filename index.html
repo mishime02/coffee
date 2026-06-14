@@ -443,6 +443,35 @@ input[type=range]{width:100%;accent-color:var(--caramel);cursor:pointer;}
 .cart-bottom-count{font-size:12px;color:var(--mist);}
 .cart-bottom-total{font-size:16px;font-weight:700;color:var(--dark);}
 .cart-bottom-btn{padding:12px 20px;background:var(--dark);color:#fff;border:none;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;white-space:nowrap;}
+
+/* 客戶端雙欄點餐版面 */
+.order-layout{display:grid;grid-template-columns:1fr 300px;gap:0;min-height:calc(100vh - 56px);max-width:860px;margin:0 auto;}
+.order-menu-col{padding:16px 16px 40px;overflow-y:auto;}
+.order-cart-col{background:#fff;border-left:1px solid #f0ebe4;padding:16px;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;display:flex;flex-direction:column;}
+.order-cart-col-title{font-size:15px;font-weight:700;margin-bottom:12px;color:var(--dark);}
+.order-cart-empty{flex:1;display:flex;align-items:center;justify-content:center;color:var(--mist);font-size:13px;text-align:center;padding:20px 0;}
+.order-cart-entries{flex:1;overflow-y:auto;}
+.order-cart-section-label{font-size:11px;font-weight:700;color:var(--mist);letter-spacing:.08em;text-transform:uppercase;margin:10px 0 6px;padding-bottom:4px;border-bottom:1px solid #f0ebe4;}
+.order-cart-entry{padding:8px 0;border-bottom:1px solid #faf8f5;}
+.order-cart-entry-name{font-size:13px;font-weight:600;}
+.order-cart-entry-sel{font-size:11px;color:var(--mist);margin-top:1px;}
+.order-cart-entry-ctrl{display:flex;align-items:center;gap:6px;margin-top:6px;}
+.order-cart-qty-btn{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--caramel);background:#fff;color:var(--caramel);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;}
+.order-cart-qty-num{font-size:13px;font-weight:700;min-width:18px;text-align:center;}
+.order-cart-price{font-weight:700;color:var(--caramel);font-size:13px;margin-left:auto;}
+.order-cart-del-btn{padding:2px 8px;background:#FEE2E0;color:var(--blush);border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;}
+.order-cart-edit-btn{padding:2px 8px;background:#FFF3E0;color:var(--caramel);border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;}
+.order-cart-sent-entry{padding:6px 0;border-bottom:1px solid #faf8f5;opacity:.65;}
+.order-cart-sent-label{font-size:10px;font-weight:700;color:var(--sage);margin-bottom:3px;}
+.order-cart-bottom{padding-top:12px;border-top:1.5px solid #f0ebe4;margin-top:auto;}
+.order-cart-total{display:flex;justify-content:space-between;font-size:15px;font-weight:700;margin-bottom:10px;}
+.order-cart-submit-btn{width:100%;padding:13px;background:var(--dark);color:#fff;border:none;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;}
+.order-cart-submit-btn:disabled{background:#ccc;cursor:not-allowed;}
+
+@media(max-width:640px){
+  .order-layout{grid-template-columns:1fr;}
+  .order-cart-col{display:none;} /* 手機用底部欄 */
+}
 </style>
 </head>
 <body>
@@ -500,12 +529,10 @@ input[type=range]{width:100%;accent-color:var(--caramel);cursor:pointer;}
         <button class="pill active" onclick="clientNav('c-stamp',this)">☕ 集點卡</button>
         <button class="pill" onclick="clientNav('c-order',this)">🍽 點餐</button>
         <button class="pill" onclick="clientNav('c-shop',this)">🛍 商店</button>
-        <button class="pill" onclick="clientNav('c-history',this)">📋 紀錄</button>
       </div>
       <div id="c-stamp" class="view show"></div>
       <div id="c-order" class="view"></div>
       <div id="c-shop" class="view"></div>
-      <div id="c-history" class="view"></div>
     </div>
   </div>
 
@@ -882,9 +909,9 @@ function clientNav(id,btn){
   document.getElementById(id).classList.add('show');
   btn.closest('.nav-pills').querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
   btn.classList.add('active');
-  // 切換分類時重置購物車追蹤
   if(id==='c-order'){ currentOrderMode='order'; renderOrderMenu(); }
   else if(id==='c-shop'){ currentOrderMode='shop'; renderShopMenu(); }
+  else if(id==='c-stamp'){ renderClientView('c-stamp'); }
   else renderClientView(id);
 }
 function adminNav(id,btn){
@@ -899,7 +926,7 @@ function adminNav(id,btn){
 // ── Client views ───────────────────────────────────
 function renderClientView(id){
   if(id==='c-stamp') renderStampCard();
-  if(id==='c-history') renderHistory();
+  // c-history 已整合至集點卡
 }
 
 function renderStampCard(){
@@ -908,6 +935,7 @@ function renderStampCard(){
   const displayStamps=total%STAMP_MAX;
   const unusedCoupons=(m.coupons||[]).filter(c=>!c.used);
   const usedCoupons=(m.coupons||[]).filter(c=>c.used);
+  const log=m.log||[];
 
   let grid='';
   for(let i=0;i<STAMP_MAX;i++){
@@ -928,12 +956,30 @@ function renderStampCard(){
     couponHTML=unusedCoupons.map(c=>`
       <div class="coupon-card" onclick="openCoupon('${c.id}')">
         <div class="coupon-card-inner">
-          <div class="coupon-left"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAYAAAA+s9J6AAAAAXNSR0IArs4c6QAAIABJREFUeF7tnQmUXVWZ7789nOHONacyVEJCkJBgNDSI0DSDtCgotILQgiI89Qm9bFuf3baNT23s1f1cPm2729bm6ZPHJIIgBBEQmQURxAAyCgQyp4bUdOd7xr3f2vvcW1UJCaESqnawvrNWrVt165zz7fv/vt/d++zh2wTwQAVQAaMKEKPW0TgqgAoAQohBgAoYVgAhNOwANI8KIIQYA6iAYQUQQsMOQPOoAEKIMYAKGFYAITTsADSPCiCEGAOogGEFEELDDkDzqABCiDGAChhWACE07AA0jwoghBgDqIBhBRBCww5A86gAQogxgAoYVgAhNOwANI8KIIQYA6iAYQUQQsMOQPOoAEKIMYAKGFYAITTsADSPCiCEGAOogGEFEELDDkDzqABCiDGAChhWACE07AA0jwoghBgDqIBhBRBCww5A86gAQogxgAoYVgAhNOwANI8KIIQYA6iAYQUQQsMOQPOoAEKIMYAKGFYAITTsADSPCiCEGAOogGEFEELDDkDzqABCiDGAChhWACE07AA0jwoghBgDqIBhBRBCww5A86gAQogxgAoYVgAhNOwANI8KIIQYA6iAYQUQQsMOQPOoAEKIMYAKGFYAITTsADSPCiCEGAOogGEFEELDDkDzqABCiDGAChhWACE07AA0jwoghBgDqIBhBRBCww5A86gAQogxgAoYVgAhNOwANI8KIIQYA6iAYQUQQsMOQPOoAEKIMYAKGFYAITTsADSPCiCEGAOogGEFEELDDkDzqABCiDGAChhWACE07AA0jwoghBgDqIBhBRBCww5A86gAQogxgAoYVgAhNOwANI8KIIQYA6iAYQUQQsMOQPOoAEKIMYAKGFYAITTsADSPCiCEGAOogGEFEELDDkDzqABCiDGAChhWACE07AA0jwoghBgDqIBhBRBCww5A86gAQvgmjwG5/g4H3DYK5UIMK1eGhBD5Jv9Ic674COGbyOVy/XqnWhnID23aNK+/f3heqTjUOzCwYWnkeQ4jNLC4VZVRFDSqdQBqlTO5zOCqQ9/aP3/RgoG+cz459ib6qHOqqAjhAepuecMN9tODG3u6e+bnSuWRnqFtWxYP9PevKJXGV0RRNI9ZrMvhrIeyqD0OAuCSgmVZIEIB9XpdMmqNpLOZF4Ukj1c8b0wy66V5hyx54syv/9+XDtCPPGeLhRAeYK4vPnRb+1O//vVBr7zwh7eH5fLRLucrqJQLmYx7KYgsIQQIAZCUAFMtTxGCciKXDNT/IJQQhiFwboPtOhDGAgTn1YaUvy/WKi8ElLw4f8niR1cdd9zvV53z6eoB9vHnZHEQwgPE7QN33ND9yLpfLd/2/PqTrSg4LUXoW6RX70wxDkwK4BADIwDqkS/5IUAJgdAPwLVssIBr+GQkgVGuIZQEoKb+n80BTbnQEBGMN2o76lH4e+a4z4t84aEj33fGfWs++N+KB4gMc7IYCKFht8unfpl57MEHD3v8scdO94rF93ZmC4fkXaedBREIvw5pxoAIAUTGACIGCTFIKUFKAVQSiIIQMpkcMELBr/sgohhcNw2ccwjjGLwggFBI8NXntDlwNwVgMQhFXClJeHoY+J0Hr1l9z+q3nvjkIaedpk/DY3YVQAhnV++drPXfcNXi+2+++gO2CE4FgMMJwCImAZgAICBA/U6kBKpe9ZUKvJ0LLKZ4kEr6qk+j/y+JrhXV7+q1dYuAURgP4w31MHomk809uOzww9ae8JXvbjQoyZw0jRAacvtT//nNpY/ec9sneyw41ZbhmlYxWgMMrdcWdC1HTYWwBeC+jknEFMATMXT1zquLiGzbNrTjkVS+8L2zrr3zd4ZkmZNmEUIDbv/pFy46ZHTDxrPc2D+nwGGNLcJXlWJPELZOVDDuL4TqeieXhbFyCTh3Izebe2VHcfy5kUbjJ8efeeTaIy/6wasLZkCvP3aTCOEse/gHF5y1KiqPnRfVau9fuWTx6sbYEDD1vLfLsTcIW6fvay2oG7cEoO77oGrETDoHTjpTGa/W+4crlQ3p3t5/v/Cq2+6aZXnmpDmEcBbd/v0LPnAwrVQusEV0Rm9b4W2V0WFIWRSo3DNKuz4DvpHFVRDWPA8KhQJISWBkrAiCsqitu+ulyE7fOtio3XrxdXc+8kbaxHu9WgGEcJai4sefOrcLguq50Xjx3M5M+pja+DgUsi6IKHrNEsw0hMyyIIoiiKPmFwFlEBJaJ7b7Yphyb6D5zE0f+s6P18+STHPSDEI4C26//9JL+fYXfntWbWTgkwva2v5cDT3k3RTEcQixeH0FmNoLOvWK/YVUNUez2SzYjIPvhyCEAOa4EBJSL/nh84Fl35DKFy4/5/Ibcdrb63PVtM9CCKct2fQv+OnHzlhTGRr6mwXt+b9wZNwOUQSRX4dYCiCWDRJePbSwq5WZgpAxrmtCEBI4pcAYg1gSCNTYIoGSsJ2XN4yMXvmF+5747vQ/OV7xehRACF+PSvtxzhUXnuhmavxvU3F8thNHb1OdMAxUE1TojpGI8NeEcE/wtYq0vzWhGoFUnUAUpH5NDgKxKhvlEFE6POL5j9ht3V/+6LU/e2Y/pMBL96AAQjjDofGjs09dWRD+pU4Un81FBBRiAKIAFHrQPDYMIZGkWQ9PhTARJSZEg+gz+mIpEt++8JZf/WCG5ZqTt0cIZ9jtN37o5I9kIvEZN46OToYiBEgqIKLqNzWDharZ2HstxUw1R6dCmJSoNTsnmVkjmQXCdkvDtdpd+aUH/90Z37lmy14LiydMSwGEcFpyTf/kW85619dTUXyhG4leVQuqGjBiCkLaDHk1RLH3+84EhMr5av5payKbKpueGtcsmWqkcjsNjUhAXcBjvuVect6Nd92399LiGdNRACGcjlrTPPfbZx+TWiZS/5EN449bsWAquEMmIaLqNQn1ZH7oq2/8esCcZnFedfpUCJN5pcmzqipQq0yulYKaF4FP+PaA2Zecc/N91+yvXbx+ZwUQwhmMiCsu/EBbV6nyr6k4+rijxyIEBAwgYBJ8piZVS7AFAN3NMMVsQxjT5Dk1gTBOJo2ryeTAQRILSvVAprrm/f0ICS/72DV31WZQtjl3a4RwBl2+9sIPtFnl0rdSofgEFwlpIQPwuYAGV8+BApxYAn+NscKZhHFqTaggjGmkvxhaqzX0/NQIwLEzUPcFyFTmqiqFL517/d39MyjbnLs1QjiDLr/6/FMyHbXou24UX6ghJAICSiFkAjxG9d9uLHdbE7aKNbsQCpC6NkyWTyUQCmDUAidTgG0jxZdYOn/6h9feiyky3sC4QQjfQDF3vdV3Tj3VWZr2vu9E4gI1PKHad0KthqcSQrVMHpJaUK0fNHEkNWFiWQ1HJJ0/yRvqiZVIATKOwU2noRbG0CCk6IN7wnk33fu0ifL+sdpECGfYs7eeddL3nTj6VNIclXpRrRoIVysX1KEHyl9H7+hMFHMqhAJYsvB3AkBVuBhkFIOTTkE9ihSEUOfOn5z/k/uemInyzNV7IoQz7Plbzjr5fztx9AVLqFXxqrknNYAKRF3jGAJQfwFMsb87CNWQitRzSW3wpQQPCHhAjzj3pgefnGHZ5tTtEcIZdvfNZ/35F9wo/idbRq6CUDf4miAa5G/iU7cCQCZI7lQTqqlsIGMg6jmWMvAoq5djcvTH1j7w7AzLNqdujxDOsLt/etZ7zkmL8N+4iBfo58Lm0QJx8ilshguyh9tPhTDJR0Obz4PJfFKqvjCEgJhbEFK+fTSiJ1x4y32vmCntH6dVhHCG/Xrdh09dkwn8y5xYHs1lpDs79OAEkcncUTVrbYbL8Fq3n5wv0+yY2QVC1YnrBxEQ14GAOb8vRv5p59/80IDBIv/RmUYIZ9ilV59/Sk+uHv/QieXptlCD4K1pYXKig8YshGoiufpa2D2EnBGoN3yg6QwE3Hp0uNE45RO3PlyZYdnm1O0Rwhl29w1nn82ILP+LG8f/3RZxx2RtqIYr1HIh0zVh8zlVNUKT1N4JkvrLQq0xZFDx6sAzWREy5/YzfnLXGTMs2Zy7PUI4Cy6/7sPve19YLn6rjfMVWYtDZXwE5vV0Q7lS0Yl4TdeEyXNpUhuqJ0Hdc9qEUGX1VmOIniRbSb5w1VnX3/WVWZBsTplACGfB3Ved/f6FLGr8dH4h+84dWzZD37x5UBwbgWw2A0EcmYOQqAF5JYCqDdXiYnWwKRACEE41hKFlb64C+fJfXnf3j2ZBsjllAiGcBXdfeuml9JCXHvsebdQv7slloV4cA5sSiKMQGOezUILdm1BZvvU4pVpkDEk55BQI1d+WY6tlV4HPrWdH4/CvL7juXsy+9gZ7DCF8gwXd0+3+6fi3rTl00YKf5S3aF1RKut4JGg1IO+4sleDVZlqp9vVCY+DJtDWZzJzRU9aauz8FhGwoRvFtrr3w8+fceOOrk6Qa+wR/HIYRwlny4xUXXuiK+pYrHBF+2NUhL4GEIdiUG5s1M7nfhVrGNAmhrhF1Co5k74oGyEfGo+hfPnnrY7fPklxzygxCOIvuvvKC01dF5dFbHRIvS3MOacZB+qHBCdwCWkusVJoN1Tkjmp0zLQipxTeWo+he1tPzP8/8P2t3zKJcc8YUQjiLrpZSkivPPfGSvOt8vj4+2tmVL4CsecYhTFY2qiGKFoRJDRhTqAFjvx4Pwn/7yM8e+eUsSjWnTCGEs+zuZ/79S/Puufee/7Gop/szXnE83QYEuEjW76lj9w5pDqjrDpQEkOSgoBM1Na9Vs3Amj53XR7VSSU09RaXW0BngZJL1LSZJT6jKf6Nm8kSEPtaIw5+ct/Y3355lmeaUOYTQgLt//Z/fWPDU47/9KlRKFy20JNhBHWQswOYcuCTge57e7DOdTkMcx3qphaAMkhQUCg4JsZRABAFbOkCa2drklJXxSZoKNQSRgKkczUQCbOt8BaGtVkkwBjUvAE/t0lRoUzNjoBSGm0JuX9O2cP41p3/zSkyDP4NxghDOoLivdesXb7hh4dOP3P1lsWPTxaxeSuCIBbiEQ09HJxAhYdvmTZDL5fT+9EIBqIY1VA2llhipThPBwBKuhipZEa/SKaqMbiq/abJ+Ub2nOmDUOWoT0aTmVK9JkqmMZcHw8DBk2tvBbeuAgVIJGpRtg0z+jhGv8t3P3PggJvyd4RhBCGdY4Ne6ff/tNy257rJvfLmvPXc+jaUDQQQZzsGv1HTP6YKeeVAulvT0MUmTBcEaK5U4WC/AVXPeLN0s1RBqEBWgCXj6bP1esjpCz4fR4xAKwiTVotqDQt1rvFIFYdkgUunt20ulO7sW9139kctvfdCgPHPGNEJo2NUvX/e9vqcfeeCiHf2D56UoXUqCCAq2CwU7BfViUQ/qq0nfSbMymW9KVErCZjqKWKrnuCRfTavmS35PUhe2jmS9oDqFN99OpqmpHtG61wArmwXmpgeLQXB3urv7yjO/ex3mF52l2EAIZ0no1zIj1/08/eCDDx/3xKOPfCRLrNPzzGoHz4Mct4CGEfA41s1TIuJkL3uFj4KQEQh13prW3acm7k1qQD3WpxunqrZU77TmqibwEielO2JqfrC91PDu6OlbdM3Zl13/0AEgy5wpAkJ4ALl6y12XL3jotl8dNbply0V5bh/N/KCjPZUGHkVAowhIHAJVPalqoF931qhnxQTC1qr9SYdOXR2R9HqqKxV4raasSjY1VPaCjkULNgaxuCqdT998zn/86MUDSJI5URSE8ABzsxpLfP5H/3Xw84/9bnVULr3LieXxLIyW0yhMkdDXEKqmqYIwaZYmWXonhjim7KykW58KPJ3TJgFQwajy20hCiz7n/aOefMruKFx38knH/eqQj/5N+QCTY04UByE8QN2sYNx+7Q8X3n//XS73gw9AFJ1Mw3ARxFEblSJDCUlTKh2us2Un81x054uGUD3v6QwxIJvQNSFsxBSGIkKHAeApj/M7Tnj/meuWn/vxrQeoDHOiWAjhm8DNct3PuzY8t7ljw0vPdQxu295Tq5UPI5Ie7lCynIvQlWHYnUqlCpxbbhwK5rquLyQpDw+PjgvKGpbrNhqBV3aymcHeRX1PONnsy0vm9zy77FNf3Ep0VYqHSQUQQpPq76PtsbtvKIyNDOerldF8/4aN84qjpVVew1vl+X6X7wWid/6C8cVLFj9r25lhIKRU6OkcY4yPpfL58QWnnzeyj2bxshlSACGcIWFn87Zy3d2FhhD5yI9SNT/kLJsOu7vmlcCpVUjfsY3ZLAvamr4CCOH0NcMrUIE3VAGE8A2VE2+GCkxfAYRw+pq9Ka5YL9c72x4v5RqUktOOOEL1huJxgCqAEB6gjtmXYm0cH28bGx3tGi4W879Zt67zzl/cvoxSMrxi+aHPXPnNb+JKiH0RdRauQQhnQeSZMiGl5MViMTsmZX79C1t6b771ltX3/frBI7iT6u7q7V7gefU8BVn2K9XLv3jJ39963kknYc/oTDljP+6LEO6HeLNxqZSSPv888PaVwNOlklPyob1aq3QNDg139o+MdWzoHzlosFhcumVr/yHbB/v7KvVGG+c8l8tleDblSr9e2lwbHrrpa/9wyWUfPPlPcQ+J2XDaNG0ghNMUbLqnq5kvyXzrZE2RlJJt2rTJymazVr1e57SNEkYYtXzLqot6qloOUoGUlmPbVHIuNm3s7y2WKrmy77mNhp/Z3j+w/Knn/nDw9u3b5tdD0Znr6umMGM0z6jCgiTullHqRMBUhtKfsIRk2fvHVv/vsN95z5OoXplt+PH/mFUAIp6nxuv4Xu4qD4z1j48VsrVxJ83TekoSoRX0tAPQMFEUdSMnGxsddx3GIbduxbdtAKaVxGLp+EKSCKMoEjVqWc069htfWPzi0ZPPW7W1Do6NuGMac2g4d3DGcZZbrcNvhjNvMtuyU5abUNVxIAsPDIwCMAmcuUM6AqDUWar2hhjCGyviOcnvGuf+rl/zt1z507FH7tK+g+iJ5+eWX7bitzbZYmQK0g1BVNCEka9suJYRWazUZxXEcsLHGqp5V1WnKOqdPRwhfh/vXrVtnDUGw4jeP/u7tjz766Clbt25dmLHTqbaunvT2YtGJKeFqw93WrdSiBp3SGoAGQWBzzqVlWUJxQyghIhY8CiMupLCkBMtxbLAtl8dSED+MQS0ddFMZcNIZqNYa4KRciARArVbX80HT6axeyuR5HvS0tUEUReD7MQRhCGpDYPU/i3G9FtFhAA6TD1/8yY9+7bzjjrp7dx9XQbZt2zY3dt02JmVGcu4S2yZCynh0fLyr7lWdSrGaK1UqBT+IUkICo4zFFmNxuVJ1g9C3g0bDAin9tGuXens6h7s72wc7c+nBw5YeNkAICV6HzHP2FIRwL66///mXD3/08cfeec8DD535yqYNqyihne35fMbhDLwYIFJbhtE9Z9FWQLSaiM0aUkNCKdWvUhANjsolo9I56aakAIhU8l1JIJXOQqPRANXUbMFXrTf0eVnXBb9SAosAMObozTwJ0asN9f/VjS0q1OLgF973nhN//P5TTr5n0fy2QajVbJtzJ53PV8q1oKceRIXRsdHOkZHRvoGh4WVDI0MHl4qldMP3nUqlmqo3Gm65VHWK1XLK9wJbJdHgnAO1OHDOie/7LPR8IiGKshmn3tPRUZ3f3bGjI5fZeOKfHXvzYX19z61cvhI3Ft1DrCGErwHh5TfdedJlP772r3wgbxOUvUWBoLYKswnTga+SL1UEgbD5LLaHWgaEELq2Uq/qUImVVBAzZkEsqP6fgka95ziO/r8QEqI4hlj9r7mIN3kfQG3SovawYFIAiwPglAIlXDdL6WTLWFfHbYUsbHr5pWJnLrPh8EOXP+NwGK+Nj8yHKMplCgVn8+BILpQkH8dxIQzDnBdEqSiKWBgn5S20dTQ/lkqJqPCm+gtBfYmo3DecUAhFDEHgQxg1AOIIKBFgMwk2SD+fsl86873vvfaUPzvh3hWLF6+bs9Xda3xwhHAP4vy/W+49du2d93x28/DYMb5F+/RiWBkn20eHqgqMdO1lZQpJeok9HAoqXbs1fyaarM0aUqgMaIQnK+WbsOoMa83cMGqNQzabND/r9boOfvW3Sl9Rq1chm3IhFiEEfqTBFDEBop4RuXr+BLC5BcXRHRD73nB3e6EaBw2byaidxHHaSaWg5MUgGJuomQlNfodm7R6pdnALOt3pk5RTlVHV1jaz9HIpLYFe1ChAihBAeEDjEMqjg7BmxSEvnHrcn139rmOP/uXKgw55AkHcWQGEcDcRofocvvStK/76yptv+UJmwfxFJJUG6rp6Aa0MQyBxBC4ktVndD3Q+sySBbvIwOPU1VuczBhZjoKhQC3JD1fSMIghjCWEYQyaTgZSbASEj/Zwno1jXiJm0C0EQgOfVdQpEZU8dquZknILjulCtV/RGSqpWpUz1DxGV6gniSGpYVC3p2hbIyAeLUfBrVchl0iCiUN8nokynvtBNY5XuovnlALpZq5rJqlmcpFjURxNS3ZwGBlGgUjKSRBu92l8AUT+gMov70J5NQ/+Gl+CwxQuf/fxFF/3ju//kHTcjhAjhXmPgkT9sPOizX/zqPzeYe3qUzuXrIoaQqtqFA0QhiMCHDLUgk0qB5/nNDVSSpLyq5prOq1qI24zuJr56z1z9lkpI0Tom01dMJvVVdiKVNVt/lSaLeJOrk0W9ydeB+i3ZAk2nxdC/J2eoI0kmnPyV7FHYOlqJoZL3JvPYTDlHlV0xSBlITpKMcExCDCGIqAFx3IC8a0N9fAicMBj7h0//1T+euGr1tUuWLBnfqxPm0AlYE+7G2VfcdMc7//V7P/gKbe9+V0lS1+3oAGLZUK2pVIQxpCwONBJQr5Z1Lba7GnBPNeOu7+vgb8I7Gf+tdBXNFfNNiFQTtZXGogWG2tJMpa/fGcBJsBRwCZvJtS2wk/u07t/aLXg3EOoCToKocpYmOW2a4EdEfzmpTqVG5ENEYrBdBm6KAVOdQqVRyNgAYXGsdNHH/vIbHzz+uKsWdy/un0OM7fWjIoS7kej6W+884vqf3/m57aXae8Zj6FEZqaXFgVkOWAJAhrFO1KtqGMlUDheV92V6NWDr/J0hnKzlEse0oGuBlNjZqbaSfGI7s+YVO32iiZT5ExuCJv9uAZmkxmjZ3aWW26VWTL4sEuBb6TRkAGC5joawHqheXAl2yoYo9qFRG4dC1gHpV4CF9R2fu/gT/+vko1dftbR9aXGvkTmHTkAId+Ps9esHum+89xcXXHHj2os7Dlp68EjNA08AOKmM3sosavhgSQZu2oFK0ACx536ZvYaSSuS789FsQk6FbReAWufrBL5C5RFVz3PJu5MNzcm7SrqrjWblKKXuYU2ydbfea0I20Uye+E/zl8kPq74QQi+EbDavn0trXgNiUM+zFkiIwKuWoJC1YGDLy/XDly996atf/NyXj3/LW3F7tV08jhDuAZPrb7/9L77+nf/6tN3Z/fbYSXXXIgG1RgA2c6EtUwAZCqjUqgApa78gbD237VqMyWewqTWirsN2AoYIttOT3NT7Td4jyd6tjsnNZJLnVwXhRJNV15BTm5tT7e0cKq39LOIwgFQqpTtn1HhmGIe6QymbToHDJWzd8GKltyP33Gkn/OlPzzvnjJuWts/ftNdvpjl2AkK4B4c//My6g+//ze9OvfG2X55fJ7SvLuR8ylKQcrOQtrMAoYSG7wGkbJ1CcL8OVRuqmqf1ugssO987eaprNQdb6ez1Oa3M2xMXTE0MPAlgC0QFX6spOvmsuXO13oKtRe/Ef5vlVZvYeH5dj11algWu64KMI/DrFQhrlUGXiv6Pn//h75+w5ojfHLVyOQ7Y7yZQ9jd89iv2DvSLXxgcXPrD669534tbB0/ZOjS8JIh5HwGei/xYTUTTwwq+iKZ0b+zjJ1Ld+xqrCbx207ychKN1VtJinewF3RnCyfasGjbQteCU4k2A2GqKNpufEwHR/JtOVJ2J/clnUvV3BLZDoFIt6WGMfCYLFmXQKFfHpO8NpjnZ+u6TTlj7oTNOfeCoZQsxqfAewgMh3As3o3I0/8Qftq28/8GHj3p03ZPHjwyXemxmZyxquV4QdxAn0y3IrvPWdunWb21d9iq1J7tEpjYTkyK1ejx3rpn0M9+UmnMy12/rua712trwcDIdfuujtq5JbO5a800Kop419RmtW+2SHJFCDELUweIA2VRaCiFGRvoHB4QXjB1z5JqH333i8Q+ceNQ7n1k2Lzu0j19Pc+IyhPB1ulmli3BH3a5tm7bNe+YPLy5/+qlnD9swMHDoQKlxUMzdFGOWQyntiaVsFwJoFKsBbgHUUpOzHeC2owfr1QwUPUgu1JA6BdtNTY7TyWSAvfWjBshVDdOaTaOmrVmWmoETa3hsmwNTexXGMVQqFT3A7/ueHjbR801VR40QuomoDt/39audSv5u+D5wNzUxBKHntDaHQ9Tv+isiVk3WZB8MXRNOjD0SYDTyaNQoRV65JPxgOJfODB66bNnjxxxxxLpjjlj98ttWrNj4OuWd06chhPvo/o0bn2yrVOLetQ/9dk0ljLvLlVquWBw/qFKp99Qb/qIgiudHQnRIwh01D9PzYz3HklIO3LLAth2g3IZyrQ7AuJ4qpiBrTexuzVxRr2ocTsFYKpX0s1dvb68Gc+PGjZBxnYn5puo8BZq6jzrUM5q6Tt1Twaiu1SssLEu/p7aXqTaCyXFK1Qsrkt2f1N6FqpOHEwBuUbCZGvcDNZun4QeNcqNe3xH7XrUzbw8dtLD3+SNWrXry7atXv9LX29v/1mXLsOabRlwhhNMQa0+nbpTS5eVyeqwxXtiyeah3/YbNSzds2LhicGR4cS7TBqVyqWNkrNxR8+rtUpA2yonq08+qaZl2KqufKRUsrTmZekVFs0ZUwKh1iGo6m4JL1XIKRgXbggULwA88vYRJHQoyBaK6XkOm5rZaln5f3W9i5UYTTMuy9RQ3XdsK9armfYp0K0ORAAAEcElEQVRQSBExITwA4TuMlur1qlevVgMKEHS1t48ctGzJtkMOfsvT8xd0bnvLkkX9zJHjqVz3jmP7+jDH6T7EE0K4D6Lt7ZL+/v50ndJszLllM2aNjI5mt/bv6BwfLxXGq8XC2Oj4gsGhHctGRosdr2za2k4ZZRQsi9vMYpSnKYMCAZYnVGY5s1mpPK47gSgDGBkeA8tmkEnnoFgsgpV2NVz5fF6DqZqkClIFbBiG5fb2dlfPR5VSrWn0wjCsl0olPwiCyLKZHzT8mFuskXbcejqd9nPZdD2TTnmO4zRsRioL5/dubssXxru7Okd6FywodnTkq9l0um47TqWxZcvokUcemXwD4LHPCiCE+yzdvl2o0lsMA6SqO3ZkSvV6yuYZ7ovYrtaqbr1SzxSL5UKlXOyoVmsdQeQX+rcPLNy8aWPn0NBw5tBDlxdXHr56/cjwjr7hkZFc35LF8bonnpzHbB5yzoMtW7a4fsNjlmMHR73jHa8cuuLQp665+uqTLMuh83vm1ZYctGSgp7tngDtWLeXaXiad9qTvq8WBQTple5lUqp7LZqtp161nbNtLZcGXVrtX6uhoHEkIwrZvLt/rVQjhXiWa/ROee07a7e0DKoMF7e7uDoaGhqxGw7FGGwMplVZiXjbrl+PYfvaZZ/r8KHK6OjpKhZ6estdogFerOapG7OnqKs7P5cqjAE5MiNvmOFEeoLFo0aKkdwaAPABATiIkmv1PiBanKoAQYjygAoYVQAgNOwDNowIIIcYAKmBYAYTQsAPQPCqAEGIMoAKGFUAIDTsAzaMCCCHGACpgWAGE0LAD0DwqgBBiDKAChhVACA07AM2jAgghxgAqYFgBhNCwA9A8KoAQYgygAoYVQAgNOwDNowIIIcYAKmBYAYTQsAPQPCqAEGIMoAKGFUAIDTsAzaMCCCHGACpgWAGE0LAD0DwqgBBiDKAChhVACA07AM2jAgghxgAqYFgBhNCwA9A8KoAQYgygAoYVQAgNOwDNowIIIcYAKmBYAYTQsAPQPCqAEGIMoAKGFUAIDTsAzaMCCCHGACpgWAGE0LAD0DwqgBBiDKAChhVACA07AM2jAgghxgAqYFgBhNCwA9A8KoAQYgygAoYVQAgNOwDNowIIIcYAKmBYAYTQsAPQPCqAEGIMoAKGFUAIDTsAzaMCCCHGACpgWAGE0LAD0DwqgBBiDKAChhVACA07AM2jAgghxgAqYFgBhNCwA9A8KoAQYgygAoYVQAgNOwDNowIIIcYAKmBYAYTQsAPQPCqAEGIMoAKGFUAIDTsAzaMCCCHGACpgWAGE0LAD0DwqgBBiDKAChhVACA07AM2jAgghxgAqYFgBhNCwA9A8KoAQYgygAoYVQAgNOwDNowIIIcYAKmBYAYTQsAPQPCqAEGIMoAKGFUAIDTsAzaMCCCHGACpgWAGE0LAD0DwqgBBiDKAChhVACA07AM2jAgghxgAqYFgBhNCwA9A8KoAQYgygAoYVQAgNOwDNowIIIcYAKmBYgf8P2iqWtLnp9HsAAAAASUVORK5CYII=" style="width:44px;height:44px;object-fit:contain;"></div>
+          <div class="coupon-left"><img src="${LOGO_B64}" style="width:44px;height:44px;object-fit:contain;"></div>
           <div class="coupon-right">
             <div class="coupon-title">外帶中杯飲品兌換券</div>
             <div class="coupon-sub">獲得於 ${c.earnedAt||''}・點擊查看 QR Code</div>
           </div>
           <div class="coupon-arrow">›</div>
+        </div>
+      </div>`).join('');
+  }
+
+  // 集點紀錄
+  let logHTML='';
+  if(!log.length){
+    logHTML='<div style="color:var(--mist);font-size:13px;padding:16px 0;text-align:center">尚無集點紀錄</div>';
+  } else {
+    logHTML=log.slice(0,20).map(l=>`
+      <div class="log-row">
+        <div>
+          <div class="${l.type==='earn'?'log-type-earn':'log-type-redeem'}">${l.type==='earn'?'獲得點數':'使用兌換券'}</div>
+          <div class="log-date">${l.date}</div>
+          ${l.note?`<div style="font-size:12px;color:var(--mist);margin-top:2px">${l.note}</div>`:''}
+        </div>
+        <div style="text-align:right">
+          ${l.type==='earn'?`<div class="log-pts">+${l.pts}</div><div class="log-pts-label">點</div>`:'<div style="font-size:22px">☕</div>'}
         </div>
       </div>`).join('');
   }
@@ -957,11 +1003,11 @@ function renderStampCard(){
           <div class="stamp-card-name">${currentUser?.displayName||'會員'}</div>
           <div class="stamp-card-sub">累計已集 ${total} 點・已兌換 ${usedCoupons.length} 次</div>
         </div>
-        <div class="stamp-progress" style="font-size:11px;text-align:right;max-width:120px;line-height:1.5;opacity:.55">集滿12點可兌換外帶中杯飲品一杯</div>
+        <div class="stamp-progress" style="font-size:10px;white-space:nowrap;text-align:right">集滿12點可兌換外帶中杯飲品一杯</div>
       </div>
     </div>
-    <div style="background:#fff;border-radius:14px;padding:14px 16px;box-shadow:0 2px 8px rgba(0,0,0,.05);text-align:center;margin-bottom:20px;">
-      <div style="font-size:13px;font-weight:700;margin-bottom:8px">如何集點？</div>
+    <div style="background:#fff;border-radius:14px;padding:14px 16px;box-shadow:0 2px 8px rgba(0,0,0,.05);margin-bottom:20px;">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">每次消費後掃描店內 QR Code 即可獲得點數 📱</div>
       <div style="font-size:12px;color:#888;line-height:1.9;text-align:left;">
         <div style="display:grid;grid-template-columns:auto 1fr;gap:0 4px;">
           <span>・</span><span>內用/外帶飲品一杯可累積 1 點。</span>
@@ -975,27 +1021,13 @@ function renderStampCard(){
       <span>🎫 我的兌換券</span>
       ${unusedCoupons.length?`<span class="coupon-count-badge">${unusedCoupons.length} 張</span>`:''}
     </div>
-    <div class="coupon-list">${couponHTML}</div>`;
+    <div class="coupon-list">${couponHTML}</div>
+    <div class="sec-title" style="margin-top:20px">📋 集點紀錄</div>
+    ${logHTML}
+  `;
 }
 
-function renderHistory(){
-  const m=memberData||{log:[]};
-  const log=m.log||[];
-  document.getElementById('c-history').innerHTML=`
-    <div class="sec-title">📋 集點紀錄</div>
-    ${!log.length?`<div style="color:var(--mist);font-size:13px;padding:20px 0;text-align:center">尚無紀錄<br>快去掃描 QR Code 集點吧！</div>`:
-    log.map(l=>`
-      <div class="log-row">
-        <div>
-          <div class="${l.type==='earn'?'log-type-earn':'log-type-redeem'}">${l.type==='earn'?'獲得點數':'使用兌換券'}</div>
-          <div class="log-date">${l.date}</div>
-          ${l.note?`<div style="font-size:12px;color:var(--mist);margin-top:2px">${l.note}</div>`:''}
-        </div>
-        <div style="text-align:right">
-          ${l.type==='earn'?`<div class="log-pts">+${l.pts}</div><div class="log-pts-label">點</div>`:'<div style="font-size:22px">☕</div>'}
-        </div>
-      </div>`).join('')}`;
-}
+function renderHistory(){/* 已整合至集點卡 */}
 
 // ── 兌換券 Panel ───────────────────────────────────
 function openCoupon(couponId){
@@ -1275,39 +1307,41 @@ async function renderOrderMenu(){
 
   const el=document.getElementById('c-order');
   el.innerHTML='';
-  const wrap=document.createElement('div');
-  wrap.className='menu-section';
 
-  // 說明
+  const layout=document.createElement('div');
+  layout.className='order-layout';
+
+  // ── 左：菜單欄 ──
+  const menuCol=document.createElement('div');
+  menuCol.className='order-menu-col';
+
   const hint=document.createElement('div');
-  hint.style.cssText='font-size:13px;color:var(--mist);margin-bottom:12px;background:#fff;border-radius:12px;padding:10px 14px;box-shadow:0 2px 8px rgba(0,0,0,.05)';
-  hint.innerHTML='🍽 點選商品加入購物車，送出後我們會送餐，<strong>離開時再至櫃台結帳</strong>';
-  wrap.appendChild(hint);
+  hint.style.cssText='font-size:12px;color:var(--mist);margin-bottom:12px;background:#fff;border-radius:10px;padding:8px 12px;';
+  hint.innerHTML='🍽 點選商品加入訂單，離開時至櫃台結帳';
+  menuCol.appendChild(hint);
 
-  // 分類欄
   const catBar=document.createElement('div');
   catBar.className='menu-cat-bar';
   catBar.innerHTML=cats.map(c=>`<button class="menu-cat-btn${activeCat===c?' active':''}" onclick="setOrderCat('${c}',this)">${c}</button>`).join('');
-  wrap.appendChild(catBar);
+  menuCol.appendChild(catBar);
 
-  // 商品列表
   const list=document.createElement('div');
   list.className='menu-item-list';
   filtered.forEach(item=>{
     const inCart=Object.values(pendingCart).filter(e=>e.id===item.id).reduce((s,e)=>s+e.qty,0);
     const div=document.createElement('div');
     div.className='menu-item-card'+(item.available===false?' unavail':'');
-    div.onclick = () => { if(item.available!==false) openItemDetail(item.id,'order'); };
+    div.onclick=()=>{ if(item.available!==false) openItemDetail(item.id,'order'); };
     div.innerHTML=`
       <div style="display:flex;align-items:center">
-        ${item.imageBase64?`<img class="menu-item-thumb" src="${item.imageBase64}" alt="${item.name}">`:''}
-        <div class="menu-item-left">
-          <div class="menu-item-name">${item.name}${item.available===false?' <span style="font-size:11px;color:var(--blush)">（暫停供應）</span>':''}</div>
+        ${item.imageBase64?`<img class="menu-item-thumb" src="${item.imageBase64}" alt="">`:''}
+        <div class="menu-item-left" style="flex:1">
+          <div class="menu-item-name">${item.name}${item.available===false?' <span style="font-size:11px;color:var(--blush)">（暫停）</span>':''}</div>
           ${item.desc?`<div class="menu-item-desc">${item.desc}</div>`:''}
           <div class="menu-item-price">NT$${item.price}</div>
         </div>
+        ${inCart?`<div style="background:var(--caramel);color:#fff;border-radius:12px;padding:2px 10px;font-size:12px;font-weight:700;flex-shrink:0">×${inCart}</div>`:'<div style="color:var(--mist);font-size:20px;flex-shrink:0">›</div>'}
       </div>
-      ${inCart?`<div style="background:var(--caramel);color:#fff;border-radius:12px;padding:2px 10px;font-size:12px;font-weight:700;flex-shrink:0">×${inCart}</div>`:'<div style="color:var(--mist);font-size:20px;flex-shrink:0">›</div>'}
     `;
     list.appendChild(div);
   });
@@ -1317,10 +1351,18 @@ async function renderOrderMenu(){
     empty.textContent='菜單準備中，請稍後';
     list.appendChild(empty);
   }
-  wrap.appendChild(list);
-  el.appendChild(wrap);
+  menuCol.appendChild(list);
 
-  // 底部購物車欄（不放在 innerHTML 中，改為更新獨立的 DOM）
+  // ── 右：購物車欄 ──
+  const cartCol=document.createElement('div');
+  cartCol.className='order-cart-col';
+  renderInlineCart(cartCol, 'order');
+
+  layout.appendChild(menuCol);
+  layout.appendChild(cartCol);
+  el.appendChild(layout);
+
+  // 手機版底部欄
   updateCartBottomBar();
 }
 
@@ -1342,18 +1384,22 @@ async function renderShopMenu(){
 
   const el=document.getElementById('c-shop');
   el.innerHTML='';
-  const wrap=document.createElement('div');
-  wrap.className='menu-section';
+
+  const layout=document.createElement('div');
+  layout.className='order-layout';
+
+  const menuCol=document.createElement('div');
+  menuCol.className='order-menu-col';
 
   const hint=document.createElement('div');
-  hint.style.cssText='font-size:13px;color:var(--mist);margin-bottom:12px;background:#fff;border-radius:12px;padding:10px 14px;box-shadow:0 2px 8px rgba(0,0,0,.05)';
-  hint.innerHTML='🛍 選購後送出，商品會送到桌邊，<strong>離開時再至櫃台結帳</strong>';
-  wrap.appendChild(hint);
+  hint.style.cssText='font-size:12px;color:var(--mist);margin-bottom:12px;background:#fff;border-radius:10px;padding:8px 12px;';
+  hint.innerHTML='🛍 選購後送出，商品送到桌邊，離開時至櫃台結帳';
+  menuCol.appendChild(hint);
 
   const catBar=document.createElement('div');
   catBar.className='menu-cat-bar';
   catBar.innerHTML=cats.map(c=>`<button class="menu-cat-btn${activeShopCat===c?' active':''}" onclick="setShopCat('${c}',this)">${c}</button>`).join('');
-  wrap.appendChild(catBar);
+  menuCol.appendChild(catBar);
 
   const list=document.createElement('div');
   list.className='menu-item-list';
@@ -1361,17 +1407,17 @@ async function renderShopMenu(){
     const inCart=Object.values(pendingCart).filter(e=>e.id===item.id).reduce((s,e)=>s+e.qty,0);
     const div=document.createElement('div');
     div.className='menu-item-card'+(item.available===false?' unavail':'');
-    div.onclick = () => { if(item.available!==false) openItemDetail(item.id,'shop'); };
+    div.onclick=()=>{ if(item.available!==false) openItemDetail(item.id,'shop'); };
     div.innerHTML=`
       <div style="display:flex;align-items:center">
-        ${item.imageBase64?`<img class="menu-item-thumb" src="${item.imageBase64}" alt="${item.name}">`:''}
-        <div class="menu-item-left">
+        ${item.imageBase64?`<img class="menu-item-thumb" src="${item.imageBase64}" alt="">`:''}
+        <div class="menu-item-left" style="flex:1">
           <div class="menu-item-name">${item.name}${item.available===false?' <span style="font-size:11px;color:var(--blush)">（售完）</span>':''}</div>
           ${item.desc?`<div class="menu-item-desc">${item.desc}</div>`:''}
           <div class="menu-item-price">NT$${item.price}</div>
         </div>
+        ${inCart?`<div style="background:var(--caramel);color:#fff;border-radius:12px;padding:2px 10px;font-size:12px;font-weight:700;flex-shrink:0">×${inCart}</div>`:'<div style="color:var(--mist);font-size:20px;flex-shrink:0">›</div>'}
       </div>
-      ${inCart?`<div style="background:var(--caramel);color:#fff;border-radius:12px;padding:2px 10px;font-size:12px;font-weight:700;flex-shrink:0">×${inCart}</div>`:'<div style="color:var(--mist);font-size:20px;flex-shrink:0">›</div>'}
     `;
     list.appendChild(div);
   });
@@ -1381,8 +1427,15 @@ async function renderShopMenu(){
     empty.textContent='商品上架中，請稍後';
     list.appendChild(empty);
   }
-  wrap.appendChild(list);
-  el.appendChild(wrap);
+  menuCol.appendChild(list);
+
+  const cartCol=document.createElement('div');
+  cartCol.className='order-cart-col';
+  renderInlineCart(cartCol,'shop');
+
+  layout.appendChild(menuCol);
+  layout.appendChild(cartCol);
+  el.appendChild(layout);
   updateCartBottomBar();
 }
 
@@ -1742,6 +1795,9 @@ async function posSubmit(){
   showToast(`✅ 訂單 #${num} 已送出並出單`);
   posCart={}; posSelections={}; posQty={}; posExpanded=null;
   renderAdminPOS();
+  // 同步更新訂單管理快取，讓切換頁面時立即看到
+  if(!_lastOrders) _lastOrders=[];
+  _lastOrders.unshift(orderData);
 }
 
 // ════════════════════════════════════════
@@ -2041,6 +2097,134 @@ async function handleImageUpload(input){
 // ════════════════════════════════════════
 //  底部購物車欄更新
 // ════════════════════════════════════════
+
+// ════════════════════════════════════════
+//  右側內嵌購物車渲染（PC版）
+// ════════════════════════════════════════
+function renderInlineCart(container, mode){
+  container.innerHTML='';
+  const titleEl=document.createElement('div');
+  titleEl.className='order-cart-col-title';
+  titleEl.textContent='🛒 我的訂單';
+  container.appendChild(titleEl);
+
+  const entriesEl=document.createElement('div');
+  entriesEl.className='order-cart-entries';
+  entriesEl.id='inline-cart-entries-'+mode;
+
+  // 已送出訂單
+  if(sentOrders.length){
+    const sentLabel=document.createElement('div');
+    sentLabel.className='order-cart-section-label';
+    sentLabel.textContent='✅ 已送出';
+    entriesEl.appendChild(sentLabel);
+    sentOrders.forEach(ord=>{
+      const sentDiv=document.createElement('div');
+      sentDiv.className='order-cart-sent-entry';
+      let inner=`<div class="order-cart-sent-label">訂單 #${ord.num}</div>`;
+      ord.items.forEach(it=>{
+        const sel=it.selections?Object.values(it.selections).map(v=>v.label).join('、'):'';
+        inner+=`<div style="font-size:12px;display:flex;justify-content:space-between">
+          <span>${it.name}${sel?' ('+sel+')':''} ×${it.qty}</span>
+          <span style="color:var(--mist)">NT$${it.price*it.qty}</span>
+        </div>`;
+      });
+      sentDiv.innerHTML=inner;
+      entriesEl.appendChild(sentDiv);
+    });
+  }
+
+  // 待送出品項
+  const pendingEntries=Object.entries(pendingCart);
+  let pendingTotal=0;
+  if(pendingEntries.length){
+    const pendingLabel=document.createElement('div');
+    pendingLabel.className='order-cart-section-label';
+    pendingLabel.textContent='🕐 待送出';
+    entriesEl.appendChild(pendingLabel);
+    pendingEntries.forEach(([key,entry])=>{
+      pendingTotal+=entry.unitPrice*entry.qty;
+      const selLabel=entry.selections?Object.values(entry.selections).map(v=>v.label).join('、'):'';
+      const items=mode==='shop'?SHOP_ITEMS:MENU_ITEMS;
+      const srcItem=items.find(x=>x.id===entry.id);
+      const hasOpts=srcItem?.optionGroups?.length>0;
+      const div=document.createElement('div');
+      div.className='order-cart-entry';
+      div.innerHTML=`
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div class="order-cart-entry-name">${entry.name}</div>
+            ${selLabel?`<div class="order-cart-entry-sel">${selLabel}</div>`:''}
+          </div>
+          <div class="order-cart-price">NT$${entry.unitPrice*entry.qty}</div>
+        </div>
+        <div class="order-cart-entry-ctrl">
+          <button class="order-cart-qty-btn" onclick="inlineCartQty('${key}',-1,'${mode}')">−</button>
+          <span class="order-cart-qty-num">${entry.qty}</span>
+          <button class="order-cart-qty-btn" onclick="inlineCartQty('${key}',1,'${mode}')">+</button>
+          ${hasOpts?`<button class="order-cart-edit-btn" onclick="cartSidebarEdit('${key}')">修改</button>`:''}
+          <button class="order-cart-del-btn" onclick="inlineCartDel('${key}','${mode}')">刪除</button>
+        </div>
+      `;
+      entriesEl.appendChild(div);
+    });
+  } else if(!sentOrders.length){
+    const empty=document.createElement('div');
+    empty.className='order-cart-empty';
+    empty.innerHTML='點左側商品<br>加入訂單';
+    entriesEl.appendChild(empty);
+  }
+  container.appendChild(entriesEl);
+
+  // 底部送出區
+  const bottomEl=document.createElement('div');
+  bottomEl.className='order-cart-bottom';
+  if(pendingEntries.length){
+    bottomEl.innerHTML=`
+      <div class="order-cart-total"><span>合計</span><span style="color:var(--caramel)">NT$${pendingTotal}</span></div>
+      <button class="order-cart-submit-btn" onclick="inlineCartSubmit('${mode}')">送出訂單</button>
+    `;
+  } else {
+    bottomEl.innerHTML=`<button class="order-cart-submit-btn" disabled>尚無待送出品項</button>`;
+  }
+  container.appendChild(bottomEl);
+}
+
+function inlineCartQty(key, delta, mode){
+  if(!pendingCart[key]) return;
+  pendingCart[key].qty=Math.max(0, pendingCart[key].qty+delta);
+  if(pendingCart[key].qty===0) delete pendingCart[key];
+  if(mode==='order') renderOrderMenu(); else renderShopMenu();
+  updateCartBottomBar();
+}
+
+function inlineCartDel(key, mode){
+  delete pendingCart[key];
+  if(mode==='order') renderOrderMenu(); else renderShopMenu();
+  updateCartBottomBar();
+}
+
+async function inlineCartSubmit(mode){
+  const pendingEntries=Object.entries(pendingCart);
+  if(!pendingEntries.length) return;
+  const orderItems=pendingEntries.map(([key,entry])=>({
+    id:entry.id,name:entry.name,price:entry.unitPrice,qty:entry.qty,
+    selections:entry.selections||{}
+  }));
+  const total=orderItems.reduce((s,x)=>s+x.price*x.qty,0);
+  const num=await getNextOrderNum();
+  await submitOrderToDB({
+    num,type:mode,items:orderItems,total,note:'',
+    memberName:currentUser?.displayName||'訪客',
+    memberId:currentUser?.uid||''
+  });
+  sentOrders.push({num,items:orderItems});
+  pendingCart={};
+  showToast(`✅ 訂單 #${num} 已送出！`);
+  if(mode==='order') renderOrderMenu(); else renderShopMenu();
+  updateCartBottomBar();
+}
+
 function updateCartBottomBar(){
   const bar = document.getElementById('cart-bottom-bar');
   if(!bar) return;
@@ -2467,7 +2651,17 @@ function posToggleExpand(itemId){
 
 function posSelectOption(itemId, gi, oi, groupName, label, price){
   if(!posSelections[itemId]) posSelections[itemId]={};
-  posSelections[itemId][groupName]={label,price};
+  const current = posSelections[itemId][groupName];
+  // 找此群組是否必選
+  const item = MENU_ITEMS.find(x=>x.id===itemId);
+  const group = item?.optionGroups?.[gi];
+  const isRequired = group?.required;
+  if(current && current.label===label && !isRequired){
+    // 再按一次取消
+    delete posSelections[itemId][groupName];
+  } else {
+    posSelections[itemId][groupName]={label,price};
+  }
   renderAdminPOS();
 }
 
@@ -2530,7 +2724,7 @@ function renderGuestNav(){
   navEl.innerHTML = `
     <button class="pill active" onclick="guestNav('c-order',this)">🍽 點餐</button>
     <button class="pill" onclick="guestNav('c-shop',this)">🛍 商店</button>
-    <button class="pill" onclick="promptLogin()">☕ 登入集點</button>
+    <button class="pill" onclick="promptLogin()">☕ 會員登入</button>
   `;
 }
 
@@ -2650,48 +2844,6 @@ function detailQtyChange(delta){
   currentDetailQty = Math.max(1, currentDetailQty + delta);
   document.getElementById('detail-qty').textContent = currentDetailQty;
   updateDetailPrice();
-}
-
-function addFromDetail(){
-  if(!currentDetailItem) return;
-  const item = currentDetailItem;
-  const groups = item.optionGroups || [];
-
-  // 檢查必選項
-  for(const g of groups){
-    if(g.required && !currentDetailSelections[g.name]){
-      showToast(`請選擇${g.name}`); return;
-    }
-  }
-
-  const basePrice = item.price;
-  const addons = Object.values(currentDetailSelections).reduce((s,o)=>s+(o.price||0),0);
-  const unitPrice = basePrice + addons;
-
-  // 組合唯一 key（含選項）
-  const selKey = Object.entries(currentDetailSelections)
-    .map(([k,v])=>`${k}:${v.label}`).join('|');
-  const cartKey = item.id + (selKey ? '::' + selKey : '');
-
-  const cartTarget = item.itemType==='shop' ? shopCart : orderCart;
-
-  if(!cartTarget[cartKey]){
-    cartTarget[cartKey] = {
-      id: item.id,
-      name: item.name,
-      unitPrice,
-      qty: 0,
-      selections: {...currentDetailSelections},
-      selKey
-    };
-  }
-  cartTarget[cartKey].qty += currentDetailQty;
-
-  closeItemDetail();
-  showToast(`已加入 ${item.name}${selKey ? ' ('+Object.values(currentDetailSelections).map(v=>v.label).join('、')+')' : ''}`);
-
-  if(item.itemType==='shop') renderShopMenu();
-  else renderOrderMenu();
 }
 
 function closeItemDetail(){
