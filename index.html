@@ -77,7 +77,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--foam);color:var(--da
 .topbar-brand{font-size:16px;font-weight:600;letter-spacing:.18em;color:var(--cream);font-family:"Noto Serif TC",serif;}
 .topbar-right{display:flex;align-items:center;gap:10px;}
 .mode-tabs{display:flex;gap:4px;}
-.mode-btn{padding:6px 18px;border:none;border-radius:20px;font-size:13px;font-family:'Noto Sans TC',sans-serif;cursor:pointer;transition:all .2s;font-weight:600;}
+.mode-btn{padding:6px 18px;border:none;border-radius:6px;font-size:13px;font-family:'Noto Sans TC',sans-serif;cursor:pointer;transition:all .2s;font-weight:600;}
 .mode-btn.active{background:var(--caramel);color:#fff;}
 .mode-btn:not(.active){background:transparent;color:var(--cream);opacity:.65;}
 .mode-btn:not(.active):hover{opacity:1;background:rgba(255,255,255,.12);}
@@ -87,7 +87,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--foam);color:var(--da
 
 /* Nav */
 .nav-pills{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
-.pill{padding:7px 16px;border-radius:20px;border:1.5px solid var(--caramel);background:#fff;color:var(--caramel);font-size:13px;font-weight:600;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .2s;}
+.pill{padding:7px 16px;border-radius:6px;border:1.5px solid var(--caramel);background:#fff;color:var(--caramel);font-size:13px;font-weight:600;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .2s;}
 .pill.active{background:var(--caramel);color:#fff;}
 .view{display:none;}.view.show{display:block;}
 
@@ -2664,7 +2664,7 @@ async function openEditItem(itemId, itemType){
       <input class="mgmt-input" id="edit-price" type="number" value="${item.price}" placeholder="價格">
       <input class="mgmt-input" id="edit-cat" value="${item.category||''}" placeholder="分類">
     </div>
-    <label class="img-upload-label" for="edit-img">📷 ${item.imageBase64?'更換圖片':'上傳圖片'}</label>
+    <label class="img-upload-label" for="edit-img">📷 點擊更換圖片（最大 5MB，自動壓縮）</label>
     <input type="file" id="edit-img" accept="image/*" style="display:none" onchange="handleImageUpload(this)">
     ${item.imageBase64?`<img id="img-preview" class="img-preview" src="${item.imageBase64}" style="display:block">`
       :'<img id="img-preview" class="img-preview" style="display:none" src="">'}
@@ -3002,18 +3002,7 @@ function updateOptLabel(gi,oi,val){ editingOptionGroups[gi].options[oi].label=va
 function updateOptPrice(gi,oi,val){ editingOptionGroups[gi].options[oi].price=val; }
 function toggleRequired(gi,val){ editingOptionGroups[gi].required=val; }
 
-function handleImageUpload(input){
-  const file = input.files[0];
-  if(!file) return;
-  if(file.size > 500*1024){ showToast('圖片請小於 500KB'); return; }
-  const reader = new FileReader();
-  reader.onload = e => {
-    editingImageBase64 = e.target.result;
-    const preview = document.getElementById('img-preview');
-    if(preview){ preview.src = editingImageBase64; preview.style.display='block'; }
-  };
-  reader.readAsDataURL(file);
-}
+// handleImageUpload 已由下方 async 版本取代
 
 
 function showOrderSubmitAlert(num){
